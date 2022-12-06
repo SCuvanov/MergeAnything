@@ -1,0 +1,30 @@
+{
+    "orgName": "Merge Anything - Base Scratch Org",
+    "edition": "Developer",
+    "hasSampleData": true,
+    "country": "US",
+    "language": "en_US",
+    "features": [],
+    "settings": {
+        "apexSettings": {
+            "enableDisableParallelApexTesting": true
+        },
+        "chatterSettings": {
+            "enableChatter": true
+        },
+        "pathAssistantSettings": {
+            "pathAssistantEnabled": false
+        },
+        "lightningExperienceSettings": {
+            "enableS1DesktopEnabled": true
+        },
+        "securitySettings": {
+            "enableAdminLoginAsAnyUser": false
+        },
+        "userManagementSettings": {
+            "enableEnhancedPermsetMgmt": true,
+            "enableEnhancedProfileMgmt": true,
+            "enableNewProfileUI": true
+        }
+    }
+}
