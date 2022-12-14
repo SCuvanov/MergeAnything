@@ -12,7 +12,8 @@
     <isNavTabPersistenceDisabled>false</isNavTabPersistenceDisabled>
     <label>Merge Anything</label>
     <navType>Standard</navType>
-    <tabs>MergeAnythingAppPage</tabs>
+    <tabs>Merge__c</tabs>
+    <tabs>Mass_Merge</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Merge_Anything_UtilityBar</utilityBar>
 </CustomApplication>
