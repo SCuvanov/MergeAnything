@@ -40,7 +40,7 @@
         <name>region3</name>
         <type>Region</type>
     </flexiPageRegions>
-    <masterLabel>Mass Merge</masterLabel>
+    <masterLabel>Bulk Merge</masterLabel>
     <template>
         <name>flexipage:appHomeTemplateTwoColumnsStacked</name>
     </template>

@@ -49,7 +49,7 @@
     <label>Merge Anything</label>
     <navType>Standard</navType>
     <tabs>Merge__c</tabs>
-    <tabs>Mass_Merge</tabs>
+    <tabs>Bulk_Merge</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Merge_Anything_UtilityBar</utilityBar>
 </CustomApplication>
