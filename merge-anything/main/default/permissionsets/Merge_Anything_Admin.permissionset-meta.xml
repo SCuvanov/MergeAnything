@@ -7,7 +7,22 @@
     <description>Administrative access to the Merge Anything App.</description>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Merge_Item__c.Merged_Record_JSON__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Merge_Item__c.Primary_Record_Id__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Merge_Item__c.Primary_Record_JSON__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Merge_Item__c.Secondary_Record_Id__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
