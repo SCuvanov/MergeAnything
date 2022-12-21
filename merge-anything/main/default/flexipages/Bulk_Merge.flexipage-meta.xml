@@ -3,16 +3,8 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentInstanceProperties>
-                    <name>decorate</name>
-                    <value>true</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>richTextValue</name>
-                    <value>&lt;p&gt;Merge List&lt;/p&gt;</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:richText</componentName>
-                <identifier>flexipage_richText</identifier>
+                <componentName>bulkMergePrimaryContainer</componentName>
+                <identifier>c_bulkMergePrimaryContainer</identifier>
             </componentInstance>
         </itemInstances>
         <name>region1</name>
@@ -21,16 +13,8 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentInstanceProperties>
-                    <name>decorate</name>
-                    <value>true</value>
-                </componentInstanceProperties>
-                <componentInstanceProperties>
-                    <name>richTextValue</name>
-                    <value>&lt;p&gt;Mass Merge Job Status / Actions&lt;/p&gt;</value>
-                </componentInstanceProperties>
-                <componentName>flexipage:richText</componentName>
-                <identifier>flexipage_richText2</identifier>
+                <componentName>bulkMergeSecondaryContainer</componentName>
+                <identifier>c_bulkMergeSecondaryContainer</identifier>
             </componentInstance>
         </itemInstances>
         <name>region2</name>
