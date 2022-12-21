@@ -1,9 +1,18 @@
 <template>
     <lightning-card>
-        <lightning-radio-group name="radioGroup"
-            options={options}
-            value={value}
-            type="button">
-        </lightning-radio-group>
+        <div class="slds-m-left_medium slds-m-right_medium slds-m-top_medium slds-m-bottom_medium">
+            <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
+                <div class="slds-col">
+                    <lightning-radio-group name="radioGroup"
+                        options={options}
+                        value={value}
+                        type="button">
+                    </lightning-radio-group>
+                </div>
+                <div class="slds-col">
+                    <lightning-button variant="neutral" label="Add Merge Item" title="Add Merge Item" icon-name="utility:add"></lightning-button>
+                </div>
+            </div>
+        </div>
     </lightning-card>
 </template>
