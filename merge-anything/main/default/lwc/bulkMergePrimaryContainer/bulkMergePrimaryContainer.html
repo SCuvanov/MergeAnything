@@ -6,11 +6,19 @@
                     <lightning-radio-group name="radioGroup"
                         options={options}
                         value={value}
-                        type="button">
+                        type="button"
+                        onchange={handleMergeOption}>
                     </lightning-radio-group>
                 </div>
                 <div class="slds-col">
-                    <lightning-button variant="neutral" label="Add Merge Item" title="Add Merge Item" icon-name="utility:add"></lightning-button>
+                    <!--
+                    <div class="slds-text-heading_small" style="font-weight: var(--lwc-fontWeightLight)" >
+                        <lightning-icon class="slds-m-right_x-small" icon-name="utility:warning" alternative-text="Warning" title="warning variant small" variant="warning" size="small"></lightning-icon>
+                        <lightning-formatted-text value="Merge Items "></lightning-formatted-text>
+                    </div>
+                    -->
+                    <lightning-button data-id="newMergeBtn" variant="neutral" label="New Merge" title="New Merge" icon-name="utility:add" onclick={handleNewMerge}></lightning-button>
+                    <lightning-button data-id="addMergeItemBtn" variant="neutral" label="Add Merge Item" title="Add Merge Item" icon-name="utility:add" onclick={handleAddMergeItem} hidden></lightning-button>
                 </div>
             </div>
         </div>
