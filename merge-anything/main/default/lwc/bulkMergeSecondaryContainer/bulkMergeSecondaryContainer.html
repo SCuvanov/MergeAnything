@@ -1,18 +1,15 @@
 <template>
     <lightning-card>
-        <div class="slds-m-left_medium slds-m-right_medium slds-m-top_medium slds-m-bottom_medium">
+        <div class="slds-m-around_medium">
             <div>
-                <div class="slds-text-heading_medium" style="font-weight: var(--lwc-fontWeightLight)">
-                    <lightning-formatted-text value="Status:"></lightning-formatted-text>
-                    <lightning-formatted-text class="slds-m-left_x-small slds-text-color_success" value={recordStatus}></lightning-formatted-text>
+                <div class="slds-text-heading_medium" style="font-weight: var(--lwc-fontWeightBold)">
+                    <lightning-formatted-text value={recordName}></lightning-formatted-text>
                 </div>
-                <div class="slds-text-heading_medium slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
-                    <lightning-formatted-text value="Merge Number:"></lightning-formatted-text>
-                    <lightning-formatted-text class="slds-m-left_x-small slds-text-color_weak" value={recordName}></lightning-formatted-text>
+                <div class="slds-text-heading_small slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
+                    <lightning-formatted-text class="slds-text-color_weak" value={recordId}></lightning-formatted-text>
                 </div>
-                <div class="slds-text-heading_medium slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
-                    <lightning-formatted-text value="Merge Id:"></lightning-formatted-text>
-                    <lightning-formatted-text class="slds-m-left_x-small slds-text-color_weak" value={recordId}></lightning-formatted-text>
+                <div class="slds-text-heading_small slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
+                    <lightning-formatted-text class="slds-text-color_success" value={recordStatus}></lightning-formatted-text>
                 </div>
             </div>
             <div class="slds-m-top_large">
