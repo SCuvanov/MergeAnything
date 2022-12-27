@@ -1,9 +1,9 @@
-import { LightningElement, api, wire } from "lwc";
-import { getRecordNotifyChange, getFieldValue } from "lightning/uiRecordApi";
+import { LightningElement, api, wire } from 'lwc';
+import { getRecordNotifyChange, getFieldValue } from 'lightning/uiRecordApi';
 
-import ID_FIELD from "@salesforce/schema/Merge__c.Id";
-import NAME_FIELD from "@salesforce/schema/Merge__c.Name";
-import STATUS_FIELD from "@salesforce/schema/Merge__c.Status__c";
+import ID_FIELD from '@salesforce/schema/Merge__c.Id';
+import NAME_FIELD from '@salesforce/schema/Merge__c.Name';
+import STATUS_FIELD from '@salesforce/schema/Merge__c.Status__c';
 
 export default class BulkMergeSecondaryContainer extends LightningElement {
     @api recordId;
@@ -15,7 +15,7 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
         return this._merge;
     }
     set merge(value) {
-        this.setAttribute("merge", value);
+        this.setAttribute('merge', value);
         this._merge = value;
     }
 
@@ -23,7 +23,7 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
         return this._recordId;
     }
     set recordId(value) {
-        this.setAttribute("recordId", value);
+        this.setAttribute('recordId', value);
         this._recordId = value;
     }
 
@@ -44,6 +44,6 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
     }
 
     handleStart(event) {
-        console.log("starting");
+        console.log('starting');
     }
 }
