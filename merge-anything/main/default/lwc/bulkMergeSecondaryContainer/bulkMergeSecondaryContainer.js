@@ -1,20 +1,22 @@
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 
+import ID_FIELD from '@salesforce/schema/Merge__c.Id';
 import NAME_FIELD from '@salesforce/schema/Merge__c.Name';
 import STATUS_FIELD from '@salesforce/schema/Merge__c.Status__c';
 
 export default class BulkMergeSecondaryContainer extends LightningElement {
-    @api recordId = 'a013J000005AQLGQA4';
 
-    @wire(getRecord, { recordId: '$recordId', fields: [NAME_FIELD, STATUS_FIELD] })
-    merge;
+    @api merge;
+    _merge;
 
-    get recordName() {
-        return getFieldValue(this.merge.data, NAME_FIELD);
+    get merge() {
+        return this._merge;
+    }
+    set merge(value) {
+        this.setAttribute('merge', value);
+        this._merge = value;
     }
 
-    get recordStatus(){
-        return getFieldValue(this.merge.data, STATUS_FIELD);
-    }
+    //TODO: Add some type of true/false to show a message if there is no record (merge) selected
 }

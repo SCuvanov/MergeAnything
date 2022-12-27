@@ -3,30 +3,16 @@
     <flexiPageRegions>
         <itemInstances>
             <componentInstance>
-                <componentName>bulkMergePrimaryContainer</componentName>
-                <identifier>c_bulkMergePrimaryContainer</identifier>
+                <componentName>bulkMergeMasterContainer</componentName>
+                <identifier>c_bulkMergeMasterContainer</identifier>
             </componentInstance>
         </itemInstances>
-        <name>region1</name>
-        <type>Region</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <itemInstances>
-            <componentInstance>
-                <componentName>bulkMergeSecondaryContainer</componentName>
-                <identifier>c_bulkMergeSecondaryContainer</identifier>
-            </componentInstance>
-        </itemInstances>
-        <name>region2</name>
-        <type>Region</type>
-    </flexiPageRegions>
-    <flexiPageRegions>
-        <name>region3</name>
+        <name>main</name>
         <type>Region</type>
     </flexiPageRegions>
     <masterLabel>Bulk Merge</masterLabel>
     <template>
-        <name>flexipage:appHomeTemplateTwoColumnsStacked</name>
+        <name>flexipage:defaultAppHomeTemplate</name>
     </template>
     <type>AppPage</type>
 </FlexiPage>
