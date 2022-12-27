@@ -2,7 +2,7 @@ import { LightningElement, wire } from 'lwc';
 import { getRecord } from 'lightning/uiRecordApi';
 import getNewestMergeId from '@salesforce/apex/BulkMergeController.getNewestMergeId';
 
-//USE LABELS / LABEL .JS FILE
+//FIELDS
 import ID_FIELD from '@salesforce/schema/Merge__c.Id';
 import NAME_FIELD from '@salesforce/schema/Merge__c.Name';
 import STATUS_FIELD from '@salesforce/schema/Merge__c.Status__c';

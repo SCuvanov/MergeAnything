@@ -1,46 +1,46 @@
 import { LightningElement, api, wire } from 'lwc';
-import { getRecordNotifyChange, getFieldValue } from 'lightning/uiRecordApi';
+import { getRecord, getRecordNotifyChange, getFieldValue } from 'lightning/uiRecordApi';
 
+//FIELDS
 import ID_FIELD from '@salesforce/schema/Merge__c.Id';
 import NAME_FIELD from '@salesforce/schema/Merge__c.Name';
 import STATUS_FIELD from '@salesforce/schema/Merge__c.Status__c';
 
 export default class BulkMergeSecondaryContainer extends LightningElement {
     @api recordId;
-    @api merge;
     _merge;
-    _recordId;
 
-    get merge() {
-        return this._merge;
-    }
-    set merge(value) {
-        this.setAttribute('merge', value);
-        this._merge = value;
-    }
-
-    get recordId() {
-        return this._recordId;
-    }
-    set recordId(value) {
-        this.setAttribute('recordId', value);
-        this._recordId = value;
+    @wire(getRecord, {
+        recordId: '$recordId',
+        fields: [ID_FIELD, NAME_FIELD, STATUS_FIELD],
+    })
+    wireMerge({ error, data }) {
+        if (data) {
+            this._merge = data;
+            this._error = undefined;
+        } else if (error) {
+            this._error = error;
+            this._merge = undefined;
+        } else {
+            this._error = undefined;
+            this._merge = undefined;
+        }
     }
 
     get _mergeId() {
-        return getFieldValue(this._merge.data, ID_FIELD);
+        return getFieldValue(this._merge, ID_FIELD);
     }
 
     get _mergeName() {
-        return getFieldValue(this._merge.data, NAME_FIELD);
+        return getFieldValue(this._merge, NAME_FIELD);
     }
 
     get _mergeStatus() {
-        return getFieldValue(this._merge.data, STATUS_FIELD);
+        return getFieldValue(this._merge, STATUS_FIELD);
     }
 
     handleRefresh(event) {
-        getRecordNotifyChange([{ recordId: this._recordId }]);
+        getRecordNotifyChange([{ recordId: this.recordId }]);
     }
 
     handleStart(event) {

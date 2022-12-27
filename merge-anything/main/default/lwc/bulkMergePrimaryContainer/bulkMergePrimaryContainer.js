@@ -1,4 +1,5 @@
-import { LightningElement, api } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
+import { getRecord } from 'lightning/uiRecordApi';
 
 const MERGES = 'merges';
 const MERGE_ITEMS = 'merge_items';
@@ -17,8 +18,13 @@ const FAILED_MERGE_ITEMS = 'failed_merge_items';
 const NEW_MERGE_BTN_ID = 'lightning-button[data-id=newMergeBtn]';
 const ADD_MERGE_ITEM_BTN_ID = 'lightning-button[data-id=addMergeItemBtn]';
 
+//FIELDS
+import ID_FIELD from '@salesforce/schema/Merge__c.Id';
+import NAME_FIELD from '@salesforce/schema/Merge__c.Name';
+import STATUS_FIELD from '@salesforce/schema/Merge__c.Status__c';
+
 export default class BulkMergePrimaryContainer extends LightningElement {
-    @api merge;
+    @api recordId;
     _merge;
     _mergeOption;
     _mergeView;
@@ -29,12 +35,21 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         this._mergeView = ALL_MERGES;
     }
 
-    get merge() {
-        return this._merge;
-    }
-    set merge(value) {
-        this.setAttribute('merge', value);
-        this._merge = value;
+    @wire(getRecord, {
+        recordId: '$recordId',
+        fields: [ID_FIELD, NAME_FIELD, STATUS_FIELD],
+    })
+    wireMerge({ error, data }) {
+        if (data) {
+            this._merge = data;
+            this._error = undefined;
+        } else if (error) {
+            this._error = error;
+            this._merge = undefined;
+        } else {
+            this._error = undefined;
+            this._merge = undefined;
+        }
     }
 
     get _mergeOptions() {
