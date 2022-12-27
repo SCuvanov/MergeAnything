@@ -3,77 +3,36 @@
     <div class="slds-m-left_medium slds-m-right_medium">
       <template if:true="{_merge}">
         <div>
-          <div
-            class="slds-text-heading_medium"
-            style="font-weight: var(--lwc-fontWeightLight)"
-          >
-            <lightning-formatted-text
-              value="Merge Details"
-            ></lightning-formatted-text>
+          <div class="slds-text-heading_medium" style="font-weight: var(--lwc-fontWeightLight)">
+            <lightning-formatted-text value="Merge Details"></lightning-formatted-text>
           </div>
           <div class="slds-border_bottom slds-m-top_small"></div>
-          <div
-            class="slds-text-heading_medium slds-m-top_small"
-            style="font-weight: var(--lwc-fontWeightBold)"
-          >
-            <lightning-formatted-text
-              value="{_mergeName}"
-            ></lightning-formatted-text>
+          <div class="slds-text-heading_medium slds-m-top_small" style="font-weight: var(--lwc-fontWeightBold)">
+            <lightning-formatted-text value="{_mergeName}"></lightning-formatted-text>
           </div>
-          <div
-            class="slds-text-heading_small slds-m-top_xx-small"
-            style="font-weight: var(--lwc-fontWeightLight)"
-          >
-            <lightning-formatted-text
-              class="slds-text-color_weak"
-              value="{_mergeId}"
-            ></lightning-formatted-text>
+          <div class="slds-text-heading_small slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
+            <lightning-formatted-text class="slds-text-color_weak" value="{_mergeId}"></lightning-formatted-text>
           </div>
-          <div
-            class="slds-text-heading_small slds-m-top_xx-small"
-            style="font-weight: var(--lwc-fontWeightLight)"
-          >
-            <lightning-formatted-text
-              class="slds-text-color_success"
-              value="{_mergeStatus}"
-            ></lightning-formatted-text>
+          <div class="slds-text-heading_small slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
+            <lightning-formatted-text class="slds-text-color_success" value="{_mergeStatus}"></lightning-formatted-text>
           </div>
         </div>
         <div class="slds-m-top_large">
-          <lightning-button
-            variant="neutral"
-            label="Refresh"
-            title="Refresh"
-            icon-name="utility:refresh"
-            onclick="{handleRefresh}"
-          ></lightning-button>
-          <lightning-button
-            variant="brand"
-            label="Start"
-            title="Start"
-            icon-name="utility:play"
-            class="slds-m-left_small"
-            onclick="{handleStart}"
-          ></lightning-button>
+          <lightning-button variant="neutral" label="Refresh" title="Refresh" icon-name="utility:refresh"
+            onclick="{handleRefresh}"></lightning-button>
+          <lightning-button variant="brand" label="Start" title="Start" icon-name="utility:play"
+            class="slds-m-left_small" onclick="{handleStart}"></lightning-button>
         </div>
         <div class="slds-m-top_medium">
           <p>PIE CHART PLACEHOLDER</p>
         </div>
       </template>
       <template if:false="{_merge}">
-        <div
-          class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-text-heading_small"
-          style="margin-bottom: 1.25rem"
-        >
-          <lightning-icon
-            class="slds-m-right_small"
-            icon-name="utility:info"
-            alternative-text="info"
-            title="info"
-          ></lightning-icon>
-          <lightning-formatted-text
-            value="No merge information available."
-          ></lightning-formatted-text>
+        <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-text-heading_small"
+          style="margin-bottom: 1.25rem">
+          <lightning-icon class="slds-m-right_small" icon-name="utility:info" alternative-text="info"
+            title="info"></lightning-icon>
+          <lightning-formatted-text value="No merge information available."></lightning-formatted-text>
         </div>
       </template>
     </div>

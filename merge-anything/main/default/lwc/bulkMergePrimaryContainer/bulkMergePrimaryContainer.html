@@ -1,58 +1,28 @@
 <template>
   <lightning-card>
     <div class="slds-m-left_medium slds-m-right_medium">
-      <div
-        class="slds-grid slds-grid_align-spread slds-grid_vertical-align-end"
-      >
+      <div class="slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
         <div class="slds-col">
-          <lightning-radio-group
-            name="radioGroup"
-            options="{_mergeOptions}"
-            value="{_mergeOption}"
-            type="button"
-            onchange="{handleMergeOption}"
-          >
+          <lightning-radio-group name="radioGroup" options="{_mergeOptions}" value="{_mergeOption}" type="button"
+            onchange="{handleMergeOption}">
           </lightning-radio-group>
         </div>
         <div class="slds-col">
-          <lightning-button
-            data-id="newMergeBtn"
-            variant="neutral"
-            label="New Merge"
-            title="New Merge"
-            icon-name="utility:add"
-            onclick="{handleNewMerge}"
-          ></lightning-button>
-          <lightning-button
-            data-id="addMergeItemBtn"
-            variant="neutral"
-            label="Add Merge Item"
-            title="Add Merge Item"
-            icon-name="utility:add"
-            onclick="{handleAddMergeItem}"
-            hidden
-          ></lightning-button>
+          <lightning-button data-id="newMergeBtn" variant="neutral" label="New Merge" title="New Merge"
+            icon-name="utility:add" onclick="{handleNewMerge}"></lightning-button>
+          <lightning-button data-id="addMergeItemBtn" variant="neutral" label="Add Merge Item" title="Add Merge Item"
+            icon-name="utility:add" onclick="{handleAddMergeItem}" hidden></lightning-button>
         </div>
       </div>
 
       <template if:true="{_merge}">
-        <div
-          class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end"
-        >
-          <lightning-combobox
-            name="merge_views"
-            label="Show Me"
-            value="{_mergeView}"
-            placeholder="Select View"
-            options="{_mergeViews}"
-            onchange="{handleMergeView}"
-          >
+        <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
+          <lightning-combobox name="merge_views" label="Show Me" value="{_mergeView}" placeholder="Select View"
+            options="{_mergeViews}" onchange="{handleMergeView}">
           </lightning-combobox>
         </div>
 
-        <div
-          class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end"
-        >
+        <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
           <c-merge-list></c-merge-list>
         </div>
       </template>
