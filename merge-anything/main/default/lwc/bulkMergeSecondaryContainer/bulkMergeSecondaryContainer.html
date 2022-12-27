@@ -8,18 +8,18 @@
                     </div>
                     <div class="slds-border_bottom slds-m-top_small" ></div>
                     <div class="slds-text-heading_medium slds-m-top_small" style="font-weight: var(--lwc-fontWeightBold)">
-                        <lightning-formatted-text value={_merge.Name}></lightning-formatted-text>
+                        <lightning-formatted-text value={_mergeName}></lightning-formatted-text>
                     </div>
                     <div class="slds-text-heading_small slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
-                        <lightning-formatted-text class="slds-text-color_weak" value={_merge.Id}></lightning-formatted-text>
+                        <lightning-formatted-text class="slds-text-color_weak" value={_mergeId}></lightning-formatted-text>
                     </div>
                     <div class="slds-text-heading_small slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
-                        <lightning-formatted-text class="slds-text-color_success" value={_merge.Status__c}></lightning-formatted-text>
+                        <lightning-formatted-text class="slds-text-color_success" value={_mergeStatus}></lightning-formatted-text>
                     </div>
                 </div>
                 <div class="slds-m-top_large">
-                    <lightning-button variant="neutral" label="Refresh" title="Refresh" icon-name="utility:refresh"></lightning-button>
-                    <lightning-button variant="brand" label="Start" title="Start" icon-name="utility:play" class="slds-m-left_small"></lightning-button>
+                    <lightning-button variant="neutral" label="Refresh" title="Refresh" icon-name="utility:refresh" onclick={handleRefresh}></lightning-button>
+                    <lightning-button variant="brand" label="Start" title="Start" icon-name="utility:play" class="slds-m-left_small" onclick={handleStart}></lightning-button>
                 </div>
                 <div class="slds-m-top_medium">
                     <p>PIE CHART PLACEHOLDER</p>

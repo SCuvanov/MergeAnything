@@ -25,7 +25,7 @@ public class MergeSelector {
 
     /**
      * @description Returns the newest `Merge__c` record based on created date
-     * @return        The list of matching `Merge__c` records
+     * @return        The single `Merge__c` record
      */
     public Merge__c getNewestMerge() {
         List<Merge__c> merges = [SELECT Id, Name, Status__c FROM Merge__c ORDER BY CreatedDate DESC];
@@ -35,5 +35,19 @@ public class MergeSelector {
         }
 
         return merges[0];
+    }
+
+    /**
+     * @description Returns the `Id` of the newest `Merge__c` record based on created date
+     * @return        The Id of a single `Merge__c` record
+     */
+    public Id getNewestMergeId() {
+        List<Merge__c> merges = [SELECT Id, Name, Status__c FROM Merge__c ORDER BY CreatedDate DESC];
+        
+        if(merges == null || merges.isEmpty()) {
+            return null;
+        }
+
+        return merges[0].Id;
     }
 }

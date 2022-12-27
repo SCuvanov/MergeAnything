@@ -15,10 +15,7 @@
                     <lightning-button data-id="addMergeItemBtn" variant="neutral" label="Add Merge Item" title="Add Merge Item" icon-name="utility:add" onclick={handleAddMergeItem} hidden></lightning-button>
                 </div>
             </div>
-            <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
-                <!--<c-bulk-merge-option-container merge={_merge} merge-option={_mergeOption}></c-bulk-merge-option-container>-->
-            </div>
-
+            
             <template if:true={_merge}>
                 <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
                     <lightning-combobox
