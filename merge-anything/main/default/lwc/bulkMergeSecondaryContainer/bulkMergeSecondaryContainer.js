@@ -43,7 +43,5 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
         getRecordNotifyChange([{ recordId: this.recordId }]);
     }
 
-    handleStart(event) {
-        console.log('starting');
-    }
+    handleStart(event) {}
 }

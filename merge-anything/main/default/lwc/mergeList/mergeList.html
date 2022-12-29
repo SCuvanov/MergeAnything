@@ -1,3 +1,5 @@
 <template>
-
+    <lightning-datatable key-field="Id" data={_filteredMerges} columns={_columns} selected-rows={_selectedMerge}
+        max-row-selection="1" onrowselection={handleMergeSelection}>
+    </lightning-datatable>
 </template>

@@ -28,11 +28,13 @@ export default class BulkMergePrimaryContainer extends LightningElement {
     _merge;
     _mergeOption;
     _mergeView;
+    _showMergeList;
 
     constructor() {
         super();
         this._mergeOption = MERGES;
         this._mergeView = ALL_MERGES;
+        this._showMergeList = true;
     }
 
     @wire(getRecord, {
@@ -98,15 +100,24 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         this._mergeView = event.detail.value;
     }
 
+    handleMergeSelection(event) {
+        const mergeSelectedEvent = new CustomEvent('mergeselection', {
+            detail: event.detail,
+        });
+        this.dispatchEvent(mergeSelectedEvent);
+    }
+
     toggleMergeOptionView(value) {
         if (value === MERGES) {
             this.template.querySelector(NEW_MERGE_BTN_ID).hidden = false;
             this.template.querySelector(ADD_MERGE_ITEM_BTN_ID).hidden = true;
             this._mergeView = ALL_MERGES;
+            this._showMergeList = true;
         } else {
             this.template.querySelector(NEW_MERGE_BTN_ID).hidden = true;
             this.template.querySelector(ADD_MERGE_ITEM_BTN_ID).hidden = false;
             this._mergeView = ALL_MERGE_ITEMS;
+            this._showMergeList = false;
         }
     }
 }

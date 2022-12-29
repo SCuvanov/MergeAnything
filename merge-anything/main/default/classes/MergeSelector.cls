@@ -58,4 +58,22 @@ public class MergeSelector {
 
         return merges[0].Id;
     }
+
+    /**
+     * @description Returns a list of `Merge__c` record based on created date
+     * @return        The List of `Merge__c` records
+     */
+    public List<Merge__c> getAllMerges() {
+        List<Merge__c> merges = [
+            SELECT Id, CreatedDate, Name, Status__c
+            FROM Merge__c
+            ORDER BY CreatedDate DESC
+        ];
+
+        if (merges == null || merges.isEmpty()) {
+            return null;
+        }
+
+        return merges;
+    }
 }
