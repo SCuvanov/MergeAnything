@@ -22,15 +22,17 @@
           </lightning-combobox>
         </div>
 
-        <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
-          <template if:true={_showMergeList}>
+        <template if:true={_showMergeList}>
+          <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
             <c-merge-list record-id={recordId} merge-view={_mergeView}
               onmergeselection={handleMergeSelection}></c-merge-list>
-          </template>
-          <template if:false={_showMergeList}>
-            <c-merge-item-list merge-view={_mergeView}></c-merge-item-list>
-          </template>
-        </div>
+          </div>
+        </template>
+        <template if:false={_showMergeList}>
+          <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
+            <c-merge-item-list record-id={recordId} merge-view={_mergeView}></c-merge-item-list>
+          </div>
+        </template>
       </template>
     </div>
   </lightning-card>

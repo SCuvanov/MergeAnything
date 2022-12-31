@@ -29,7 +29,7 @@ public class MergeSelector {
      */
     public Merge__c getNewestMerge() {
         List<Merge__c> merges = [
-            SELECT Id, Name, Status__c
+            SELECT Id, CreatedDate, Name, Status__c
             FROM Merge__c
             ORDER BY CreatedDate DESC
         ];
@@ -47,7 +47,7 @@ public class MergeSelector {
      */
     public Id getNewestMergeId() {
         List<Merge__c> merges = [
-            SELECT Id, Name, Status__c
+            SELECT Id, CreatedDate, Name, Status__c
             FROM Merge__c
             ORDER BY CreatedDate DESC
         ];

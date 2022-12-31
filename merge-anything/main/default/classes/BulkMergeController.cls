@@ -13,4 +13,10 @@ public class BulkMergeController {
     public static List<Merge__c> getAllMerges() {
         return MergeSelector.getInstance().getAllMerges();
     }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Merge_Item__c> getMergeItemsByMergeId(Id mergeId) {
+        System.debug(mergeId);
+        return MergeItemSelector.getInstance().getMergeItemsByMergeId(mergeId);
+    }
 }

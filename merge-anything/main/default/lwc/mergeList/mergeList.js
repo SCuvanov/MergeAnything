@@ -1,4 +1,4 @@
-import { LightningElement, api, wire, track } from 'lwc';
+import { LightningElement, api, wire } from 'lwc';
 import getAllMerges from '@salesforce/apex/BulkMergeController.getAllMerges';
 
 const ALL_MERGES = 'all_merges';
@@ -49,7 +49,7 @@ export default class MergeList extends LightningElement {
         this.setAttribute('merge-view', value);
         this._mergeView = value;
 
-        this.filterMerges(this._mergeView);
+        this.filterMerges();
     }
 
     @wire(getAllMerges, {})
@@ -65,23 +65,23 @@ export default class MergeList extends LightningElement {
             this._merges = undefined;
         }
 
-        this.filterMerges(this._mergeView);
+        this.filterMerges();
     }
 
-    filterMerges(value) {
+    filterMerges() {
         if (!this._merges) {
             return;
         }
 
-        if (value === undefined || value === null || value === ALL_MERGES) {
+        if (this._mergeView === undefined || this._mergeView === null || this._mergeView === ALL_MERGES) {
             this._filteredMerges = this._merges;
-        } else if (value === PENDING_MERGES) {
+        } else if (this._mergeView === PENDING_MERGES) {
             this._filteredMerges = this._merges.filter((merge) => merge.Status__c === 'Pending');
-        } else if (value === IN_PROGRESS_MERGES) {
+        } else if (this._mergeView === IN_PROGRESS_MERGES) {
             this._filteredMerges = this._merges.filter((merge) => merge.Status__c === 'In Progress');
-        } else if (value === COMPLETED_MERGES) {
+        } else if (this._mergeView === COMPLETED_MERGES) {
             this._filteredMerges = this._merges.filter((merge) => merge.Status__c === 'Completed');
-        } else if (value === FAILED_MERGES) {
+        } else if (this._mergeView === FAILED_MERGES) {
             this._filteredMerges = this._merges.filter((merge) => merge.Status__c === 'Failed');
         }
 
