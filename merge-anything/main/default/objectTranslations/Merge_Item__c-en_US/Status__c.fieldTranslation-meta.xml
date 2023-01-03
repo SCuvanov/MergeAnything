@@ -4,15 +4,19 @@
     <label></label>
     <name>Status__c</name>
     <picklistValues>
+        <masterLabel>Completed</masterLabel>
+        <translation></translation>
+    </picklistValues>
+    <picklistValues>
         <masterLabel>Failed</masterLabel>
         <translation></translation>
     </picklistValues>
     <picklistValues>
-        <masterLabel>Pending</masterLabel>
+        <masterLabel>In Progress</masterLabel>
         <translation></translation>
     </picklistValues>
     <picklistValues>
-        <masterLabel>Success</masterLabel>
+        <masterLabel>Pending</masterLabel>
         <translation></translation>
     </picklistValues>
 </CustomFieldTranslation>

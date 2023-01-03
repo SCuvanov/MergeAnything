@@ -37,7 +37,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Merge__c.Status__c</field>
+        <field>Merge_Job__c.Status__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
@@ -57,15 +57,15 @@
         <allowEdit>true</allowEdit>
         <allowRead>true</allowRead>
         <modifyAllRecords>true</modifyAllRecords>
-        <object>Merge__c</object>
+        <object>Merge_Job__c</object>
         <viewAllRecords>true</viewAllRecords>
     </objectPermissions>
     <tabSettings>
-        <tab>Mass_Merge</tab>
+        <tab>Bulk_Merge</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>
-        <tab>Merge__c</tab>
+        <tab>Merge_Job__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
 </PermissionSet>

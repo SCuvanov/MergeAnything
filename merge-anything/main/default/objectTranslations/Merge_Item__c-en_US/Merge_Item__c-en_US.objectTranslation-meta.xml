@@ -16,7 +16,7 @@
         </sections>
         <sections>
             <label></label>
-            <section>JSON Data</section>
+            <section>Record Details</section>
         </sections>
     </layouts>
     <startsWith>Consonant</startsWith>

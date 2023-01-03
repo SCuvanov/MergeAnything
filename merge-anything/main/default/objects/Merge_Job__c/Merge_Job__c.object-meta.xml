@@ -129,7 +129,7 @@
     <actionOverrides>
         <actionName>View</actionName>
         <comment>Action override created by Lightning App Builder during activation.</comment>
-        <content>Merge_Record_Page</content>
+        <content>Merge_Job_Record_Page</content>
         <formFactor>Large</formFactor>
         <skipRecordTypeSelect>false</skipRecordTypeSelect>
         <type>Flexipage</type>
@@ -137,7 +137,7 @@
     <actionOverrides>
         <actionName>View</actionName>
         <comment>Action override created by Lightning App Builder during activation.</comment>
-        <content>Merge_Record_Page</content>
+        <content>Merge_Job_Record_Page</content>
         <formFactor>Small</formFactor>
         <skipRecordTypeSelect>false</skipRecordTypeSelect>
         <type>Flexipage</type>
@@ -158,14 +158,14 @@
     <enableSearch>true</enableSearch>
     <enableSharing>false</enableSharing>
     <enableStreamingApi>false</enableStreamingApi>
-    <externalSharingModel>ReadWrite</externalSharingModel>
-    <label>Merge</label>
+    <externalSharingModel>Private</externalSharingModel>
+    <label>Merge Job</label>
     <nameField>
-        <displayFormat>M-{000000}</displayFormat>
-        <label>Merge Number</label>
+        <displayFormat>MJ-{000000}</displayFormat>
+        <label>Merge Job Number</label>
         <type>AutoNumber</type>
     </nameField>
-    <pluralLabel>Merges</pluralLabel>
+    <pluralLabel>Merge Jobs</pluralLabel>
     <searchLayouts></searchLayouts>
     <sharingModel>ReadWrite</sharingModel>
     <visibility>Public</visibility>

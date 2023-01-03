@@ -14,7 +14,7 @@
         </layoutColumns>
         <layoutColumns>
             <layoutItems>
-                <behavior>Readonly</behavior>
+                <behavior>Edit</behavior>
                 <field>Status__c</field>
             </layoutItems>
         </layoutColumns>
@@ -51,8 +51,7 @@
     </layoutSections>
     <relatedLists>
         <fields>NAME</fields>
-        <fields>Status__c</fields>
-        <relatedList>Merge_Item__c.Merge__c</relatedList>
+        <relatedList>Merge_Item__c.Merge_Job__c</relatedList>
     </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>
     <showHighlightsPanel>false</showHighlightsPanel>
@@ -60,7 +59,7 @@
     <showRunAssignmentRulesCheckbox>false</showRunAssignmentRulesCheckbox>
     <showSubmitAndAttachButton>false</showSubmitAndAttachButton>
     <summaryLayout>
-        <masterLabel>00h3J000000i6R9</masterLabel>
+        <masterLabel>00h3J000000iBi9</masterLabel>
         <sizeX>4</sizeX>
         <sizeY>0</sizeY>
         <summaryLayoutStyle>Default</summaryLayoutStyle>
