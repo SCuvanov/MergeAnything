@@ -1,3 +1,14 @@
-import { LightningElement } from 'lwc';
+import { api } from 'lwc';
+import LightningModal from 'lightning/modal';
 
-export default class NewMergeModal extends LightningElement {}
+const SUCCESS = 'success';
+
+export default class NewMergeModal extends LightningModal {
+    handleNo() {
+        this.close();
+    }
+
+    handleYes() {
+        this.close(SUCCESS);
+    }
+}

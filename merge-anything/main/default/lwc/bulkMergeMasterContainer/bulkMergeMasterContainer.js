@@ -1,11 +1,11 @@
 import { LightningElement, wire } from 'lwc';
-import getNewestMergeId from '@salesforce/apex/BulkMergeController.getNewestMergeId';
+import getNewestMergeJobId from '@salesforce/apex/BulkMergeController.getNewestMergeJobId';
 
 export default class BulkMergeMasterContainer extends LightningElement {
     _recordId;
     _error;
 
-    @wire(getNewestMergeId, {})
+    @wire(getNewestMergeJobId, {})
     wireNewestMergeId({ error, data }) {
         if (data) {
             this._recordId = data;

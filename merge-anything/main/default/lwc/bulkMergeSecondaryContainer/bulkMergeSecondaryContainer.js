@@ -2,9 +2,9 @@ import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getRecordNotifyChange, getFieldValue } from 'lightning/uiRecordApi';
 
 //FIELDS
-import ID_FIELD from '@salesforce/schema/Merge__c.Id';
-import NAME_FIELD from '@salesforce/schema/Merge__c.Name';
-import STATUS_FIELD from '@salesforce/schema/Merge__c.Status__c';
+import ID_FIELD from '@salesforce/schema/Merge_Job__c.Id';
+import NAME_FIELD from '@salesforce/schema/Merge_Job__c.Name';
+import STATUS_FIELD from '@salesforce/schema/Merge_Job__c.Status__c';
 
 export default class BulkMergeSecondaryContainer extends LightningElement {
     @api recordId;

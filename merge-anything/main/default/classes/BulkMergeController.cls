@@ -1,22 +1,26 @@
 public class BulkMergeController {
     @AuraEnabled(cacheable=true)
-    public static Merge__c getNewestMerge() {
-        return MergeSelector.getInstance().getNewestMerge();
+    public static Merge_Job__c getNewestMergeJob() {
+        return MergeJobSelector.getInstance().getNewestMergeJob();
     }
 
     @AuraEnabled(cacheable=true)
-    public static Id getNewestMergeId() {
-        return MergeSelector.getInstance().getNewestMergeId();
+    public static Id getNewestMergeJobId() {
+        return MergeJobSelector.getInstance().getNewestMergeJobId();
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<Merge__c> getAllMerges() {
-        return MergeSelector.getInstance().getAllMerges();
+    public static List<Merge_Job__c> getAllMergeJobs() {
+        return MergeJobSelector.getInstance().getAllMergeJobs();
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<Merge_Item__c> getMergeItemsByMergeId(Id mergeId) {
-        System.debug(mergeId);
-        return MergeItemSelector.getInstance().getMergeItemsByMergeId(mergeId);
+    public static List<Merge_Item__c> getMergeItemsByMergeJobId(Id mergeId) {
+        return MergeItemSelector.getInstance().getMergeItemsByMergeJobId(mergeId);
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static Id createNewMerge() {
+        return null;
     }
 }

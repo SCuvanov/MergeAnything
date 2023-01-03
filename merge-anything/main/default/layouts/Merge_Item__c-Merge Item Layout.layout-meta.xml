@@ -15,13 +15,12 @@
                 <behavior>Readonly</behavior>
                 <field>Status__c</field>
             </layoutItems>
-        </layoutColumns>
-        <layoutColumns>
             <layoutItems>
                 <behavior>Required</behavior>
-                <field>Merge__c</field>
+                <field>Merge_Job__c</field>
             </layoutItems>
         </layoutColumns>
+        <layoutColumns/>
         <style>TwoColumnsTopToBottom</style>
     </layoutSections>
     <layoutSections>

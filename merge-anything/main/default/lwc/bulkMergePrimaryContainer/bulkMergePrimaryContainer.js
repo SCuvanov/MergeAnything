@@ -1,5 +1,6 @@
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord } from 'lightning/uiRecordApi';
+import NewMergeModal from 'c/newMergeModal';
 
 const MERGES = 'merges';
 const MERGE_ITEMS = 'merge_items';
@@ -13,15 +14,16 @@ const PENDING_MERGE_ITEMS = 'pending_merge_items';
 const IN_PROGRESS_MERGE_ITEMS = 'in_progress_merge_items';
 const COMPLETED_MERGE_ITEMS = 'completed_merge_items';
 const FAILED_MERGE_ITEMS = 'failed_merge_items';
+const SUCCESS = 'success';
 
 //UI
 const NEW_MERGE_BTN_ID = 'lightning-button[data-id=newMergeBtn]';
 const ADD_MERGE_ITEM_BTN_ID = 'lightning-button[data-id=addMergeItemBtn]';
 
 //FIELDS
-import ID_FIELD from '@salesforce/schema/Merge__c.Id';
-import NAME_FIELD from '@salesforce/schema/Merge__c.Name';
-import STATUS_FIELD from '@salesforce/schema/Merge__c.Status__c';
+import ID_FIELD from '@salesforce/schema/Merge_Job__c.Id';
+import NAME_FIELD from '@salesforce/schema/Merge_Job__c.Name';
+import STATUS_FIELD from '@salesforce/schema/Merge_Job__c.Status__c';
 
 export default class BulkMergePrimaryContainer extends LightningElement {
     @api recordId;
@@ -88,11 +90,17 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         this.toggleMergeOptionView(this._mergeOption);
     }
 
-    handleNewMerge(event) {
-        console.log('New Merge Clicked');
+    async handleNewMerge() {
+        const result = await NewMergeModal.open({
+            size: 'small',
+        });
+
+        if (result === SUCCESS) {
+            this.createNewMerge();
+        }
     }
 
-    handleAddMergeItem(event) {
+    async handleAddMergeItem() {
         console.log('Add Merge Item Clicked');
     }
 
@@ -119,5 +127,10 @@ export default class BulkMergePrimaryContainer extends LightningElement {
             this._mergeView = ALL_MERGE_ITEMS;
             this._showMergeList = false;
         }
+    }
+
+    createNewMerge() {
+        //TODO: Write a controller method to create a new merge, refresh the list, and select the new merge
+        //TODO: Perhaps use the refreshApex method for newestMerge, might need to create an event to refresh the list
     }
 }

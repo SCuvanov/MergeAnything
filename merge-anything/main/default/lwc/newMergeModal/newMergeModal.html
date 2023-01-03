@@ -1,3 +1,22 @@
 <template>
-    
+    <lightning-modal-header label="New Merge"></lightning-modal-header>
+    <lightning-modal-body>
+        <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center">
+            <div>
+                <lightning-formatted-text class="slds-text-heading_small"
+                    value="You are about to create a new Merge. Are you sure you want to do this?"></lightning-formatted-text>
+            </div>
+            <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-top_small">
+                <lightning-icon class="slds-m-right_x-small" icon-name="utility:info" alternative-text="info"
+                    title="info" size="x-small"></lightning-icon>
+                <lightning-formatted-text class="slds-text-color_weak"
+                    value="A Merge is the top-level container for a collection of Merge Item records."></lightning-formatted-text>
+            </div>
+        </div>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="No" onclick={handleNo}></lightning-button>
+        <lightning-button class="slds-m-left_xx-small" label="Yes" variant="brand"
+            onclick={handleYes}></lightning-button>
+    </lightning-modal-footer>
 </template>

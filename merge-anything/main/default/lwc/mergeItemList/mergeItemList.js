@@ -1,5 +1,5 @@
 import { LightningElement, api, wire } from 'lwc';
-import getMergeItemsByMergeId from '@salesforce/apex/BulkMergeController.getMergeItemsByMergeId';
+import getMergeItemsByMergeJobId from '@salesforce/apex/BulkMergeController.getMergeItemsByMergeJobId';
 
 const ALL_MERGE_ITEMS = 'all_merge_items';
 const PENDING_MERGE_ITEMS = 'pending_merge_items';
@@ -52,7 +52,7 @@ export default class MergeItemList extends LightningElement {
         this.filterMergeItems();
     }
 
-    @wire(getMergeItemsByMergeId, { mergeId: '$_recordId' })
+    @wire(getMergeItemsByMergeJobId, { mergeId: '$_recordId' })
     wireMergesItems({ error, data }) {
         if (data) {
             this._mergeItems = data;
