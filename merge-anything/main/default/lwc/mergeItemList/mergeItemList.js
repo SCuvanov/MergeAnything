@@ -52,7 +52,7 @@ export default class MergeItemList extends LightningElement {
         this.filterMergeItems();
     }
 
-    @wire(getMergeItemsByMergeJobId, { mergeId: '$_recordId' })
+    @wire(getMergeItemsByMergeJobId, { mergeJobId: '$_recordId' })
     wireMergesItems({ error, data }) {
         if (data) {
             this._mergeItems = data;

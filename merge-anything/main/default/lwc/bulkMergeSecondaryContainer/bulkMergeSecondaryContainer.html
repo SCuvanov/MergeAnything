@@ -1,20 +1,21 @@
 <template>
   <lightning-card>
     <div class="slds-m-left_medium slds-m-right_medium">
-      <template if:true={_merge}>
+      <template if:true={_mergeJob}>
         <div>
           <div class="slds-text-heading_medium" style="font-weight: var(--lwc-fontWeightLight)">
             <lightning-formatted-text value="Merge Details"></lightning-formatted-text>
           </div>
           <div class="slds-border_bottom slds-m-top_small"></div>
           <div class="slds-text-heading_medium slds-m-top_small" style="font-weight: var(--lwc-fontWeightBold)">
-            <lightning-formatted-text value={_mergeName}></lightning-formatted-text>
+            <lightning-formatted-text value={_mergeJobName}></lightning-formatted-text>
           </div>
           <div class="slds-text-heading_small slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
-            <lightning-formatted-text class="slds-text-color_weak" value={_mergeId}></lightning-formatted-text>
+            <lightning-formatted-text class="slds-text-color_weak" value={_mergeJobId}></lightning-formatted-text>
           </div>
           <div class="slds-text-heading_small slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
-            <lightning-formatted-text class="slds-text-color_success" value={_mergeStatus}></lightning-formatted-text>
+            <lightning-formatted-text class="slds-text-color_success"
+              value={_mergeJobStatus}></lightning-formatted-text>
           </div>
         </div>
         <div class="slds-m-top_large">
@@ -27,12 +28,12 @@
           <p>PIE CHART PLACEHOLDER</p>
         </div>
       </template>
-      <template if:false={_merge}>
+      <template if:false={_mergeJob}>
         <div class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-text-heading_small"
           style="margin-bottom: 1.25rem">
           <lightning-icon class="slds-m-right_small" icon-name="utility:info" alternative-text="info"
             title="info"></lightning-icon>
-          <lightning-formatted-text value="No merge information available."></lightning-formatted-text>
+          <lightning-formatted-text value="Merge Job information unavailable."></lightning-formatted-text>
         </div>
       </template>
     </div>

@@ -1,14 +1,14 @@
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord } from 'lightning/uiRecordApi';
-import NewMergeModal from 'c/newMergeModal';
+import NewMergeJobModal from 'c/newMergeJobModal';
 
-const MERGES = 'merges';
+const MERGE_JOBS = 'merge_jobs';
 const MERGE_ITEMS = 'merge_items';
-const ALL_MERGES = 'all_merges';
-const PENDING_MERGES = 'pending_merges';
-const IN_PROGRESS_MERGES = 'in_progress_merges';
-const COMPLETED_MERGES = 'completed_merges';
-const FAILED_MERGES = 'failed_merges';
+const ALL_MERGE_JOBS = 'all_merge_jobs';
+const PENDING_MERGE_JOBS = 'pending_merge_jobs';
+const IN_PROGRESS_MERGE_JOBS = 'in_progress_merge_jobs';
+const COMPLETED_MERGE_JOBS = 'completed_merge_jobs';
+const FAILED_MERGE_JOBS = 'failed_merge_jobs';
 const ALL_MERGE_ITEMS = 'all_merge_items';
 const PENDING_MERGE_ITEMS = 'pending_merge_items';
 const IN_PROGRESS_MERGE_ITEMS = 'in_progress_merge_items';
@@ -17,7 +17,7 @@ const FAILED_MERGE_ITEMS = 'failed_merge_items';
 const SUCCESS = 'success';
 
 //UI
-const NEW_MERGE_BTN_ID = 'lightning-button[data-id=newMergeBtn]';
+const NEW_MERGE_JOB_BTN_ID = 'lightning-button[data-id=newMergeJobBtn]';
 const ADD_MERGE_ITEM_BTN_ID = 'lightning-button[data-id=addMergeItemBtn]';
 
 //FIELDS
@@ -27,51 +27,51 @@ import STATUS_FIELD from '@salesforce/schema/Merge_Job__c.Status__c';
 
 export default class BulkMergePrimaryContainer extends LightningElement {
     @api recordId;
-    _merge;
+    _mergeJob;
     _mergeOption;
     _mergeView;
-    _showMergeList;
+    _showMergeJobList;
 
     constructor() {
         super();
-        this._mergeOption = MERGES;
-        this._mergeView = ALL_MERGES;
-        this._showMergeList = true;
+        this._mergeOption = MERGE_JOBS;
+        this._mergeView = ALL_MERGE_JOBS;
+        this._showMergeJobList = true;
     }
 
     @wire(getRecord, {
         recordId: '$recordId',
         fields: [ID_FIELD, NAME_FIELD, STATUS_FIELD],
     })
-    wireMerge({ error, data }) {
+    wireMergeJob({ error, data }) {
         if (data) {
-            this._merge = data;
+            this._mergeJob = data;
             this._error = undefined;
         } else if (error) {
             this._error = error;
-            this._merge = undefined;
+            this._mergeJob = undefined;
         } else {
             this._error = undefined;
-            this._merge = undefined;
+            this._mergeJob = undefined;
         }
     }
 
     get _mergeOptions() {
         return [
-            { label: 'Merges', value: MERGES },
+            { label: 'Merge Jobs', value: MERGE_JOBS },
             { label: 'Merge Items', value: MERGE_ITEMS },
         ];
     }
 
     get _mergeViews() {
         let mergeViews = [];
-        if (this._mergeOption === MERGES) {
+        if (this._mergeOption === MERGE_JOBS) {
             mergeViews = [
-                { label: 'All Merges', value: ALL_MERGES },
-                { label: 'Pending Merges', value: PENDING_MERGES },
-                { label: 'In Progress Merges', value: IN_PROGRESS_MERGES },
-                { label: 'Completed Merges', value: COMPLETED_MERGES },
-                { label: 'Failed Merges', value: FAILED_MERGES },
+                { label: 'All Merge Jobs', value: ALL_MERGE_JOBS },
+                { label: 'Pending Merge Jobs', value: PENDING_MERGE_JOBS },
+                { label: 'In Progress Merge Jobs', value: IN_PROGRESS_MERGE_JOBS },
+                { label: 'Completed Merge Jobs', value: COMPLETED_MERGE_JOBS },
+                { label: 'Failed Merge Jobs', value: FAILED_MERGE_JOBS },
             ];
         } else if (this._mergeOption === MERGE_ITEMS) {
             mergeViews = [
@@ -91,7 +91,7 @@ export default class BulkMergePrimaryContainer extends LightningElement {
     }
 
     async handleNewMerge() {
-        const result = await NewMergeModal.open({
+        const result = await NewMergeJobModal.open({
             size: 'small',
         });
 
@@ -108,24 +108,24 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         this._mergeView = event.detail.value;
     }
 
-    handleMergeSelection(event) {
-        const mergeSelectedEvent = new CustomEvent('mergeselection', {
+    handleMergeJobSelection(event) {
+        const mergeJobSelectedEvent = new CustomEvent('mergejobselected', {
             detail: event.detail,
         });
-        this.dispatchEvent(mergeSelectedEvent);
+        this.dispatchEvent(mergeJobSelectedEvent);
     }
 
     toggleMergeOptionView(value) {
-        if (value === MERGES) {
-            this.template.querySelector(NEW_MERGE_BTN_ID).hidden = false;
+        if (value === MERGE_JOBS) {
+            this.template.querySelector(NEW_MERGE_JOB_BTN_ID).hidden = false;
             this.template.querySelector(ADD_MERGE_ITEM_BTN_ID).hidden = true;
-            this._mergeView = ALL_MERGES;
-            this._showMergeList = true;
+            this._mergeView = ALL_MERGE_JOBS;
+            this._showMergeJobList = true;
         } else {
-            this.template.querySelector(NEW_MERGE_BTN_ID).hidden = true;
+            this.template.querySelector(NEW_MERGE_JOB_BTN_ID).hidden = true;
             this.template.querySelector(ADD_MERGE_ITEM_BTN_ID).hidden = false;
             this._mergeView = ALL_MERGE_ITEMS;
-            this._showMergeList = false;
+            this._showMergeJobList = false;
         }
     }
 

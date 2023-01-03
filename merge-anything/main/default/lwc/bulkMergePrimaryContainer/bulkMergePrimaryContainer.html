@@ -8,27 +8,27 @@
           </lightning-radio-group>
         </div>
         <div class="slds-col">
-          <lightning-button data-id="newMergeBtn" variant="neutral" label="New Merge" title="New Merge"
+          <lightning-button data-id="newMergeJobBtn" variant="neutral" label="New Merge Job" title="New Merge"
             icon-name="utility:add" onclick={handleNewMerge}></lightning-button>
           <lightning-button data-id="addMergeItemBtn" variant="neutral" label="Add Merge Item" title="Add Merge Item"
             icon-name="utility:add" onclick={handleAddMergeItem} hidden></lightning-button>
         </div>
       </div>
 
-      <template if:true={_merge}>
+      <template if:true={_mergeJob}>
         <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
           <lightning-combobox name="merge_views" label="Show Me" value={_mergeView} placeholder="Select View"
             options={_mergeViews} onchange={handleMergeView}>
           </lightning-combobox>
         </div>
 
-        <template if:true={_showMergeList}>
+        <template if:true={_showMergeJobList}>
           <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
             <c-merge-list record-id={recordId} merge-view={_mergeView}
-              onmergeselection={handleMergeSelection}></c-merge-list>
+              onmergejobselected={handleMergeJobSelection}></c-merge-list>
           </div>
         </template>
-        <template if:false={_showMergeList}>
+        <template if:false={_showMergeJobList}>
           <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
             <c-merge-item-list record-id={recordId} merge-view={_mergeView}></c-merge-item-list>
           </div>

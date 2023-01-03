@@ -3,7 +3,7 @@ import LightningModal from 'lightning/modal';
 
 const SUCCESS = 'success';
 
-export default class NewMergeModal extends LightningModal {
+export default class NewMergeJobModal extends LightningModal {
     handleNo() {
         this.close();
     }

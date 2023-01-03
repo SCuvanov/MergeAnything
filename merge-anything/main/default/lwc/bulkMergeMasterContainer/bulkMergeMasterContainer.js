@@ -6,7 +6,7 @@ export default class BulkMergeMasterContainer extends LightningElement {
     _error;
 
     @wire(getNewestMergeJobId, {})
-    wireNewestMergeId({ error, data }) {
+    wireNewestMergeJobId({ error, data }) {
         if (data) {
             this._recordId = data;
             this._error = undefined;
@@ -19,7 +19,7 @@ export default class BulkMergeMasterContainer extends LightningElement {
         }
     }
 
-    handleMergeSelection(event) {
+    handleMergeJobSelection(event) {
         this._recordId = event.detail;
     }
 }

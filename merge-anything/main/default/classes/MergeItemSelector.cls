@@ -39,10 +39,10 @@ public class MergeItemSelector {
 
     /**
      * @description Returns a list of `Merge_Item__c` records
-     * @param  mergeId The single `Merge_Job__c` Id of the `Merge_Item__c` records to query
+     * @param  mergeJobId The single `Merge_Job__c` Id of the `Merge_Item__c` records to query
      * @return        The list of matching `Merge_Item__c` records
      */
-    public List<Merge_Item__c> getMergeItemsByMergeJobId(Id mergeId) {
+    public List<Merge_Item__c> getMergeItemsByMergeJobId(Id mergeJobId) {
         return [
             SELECT
                 Id,
@@ -56,7 +56,7 @@ public class MergeItemSelector {
                 Secondary_Record_JSON__c,
                 Status__c
             FROM Merge_Item__c
-            WHERE Merge_Job__c = :mergeId
+            WHERE Merge_Job__c = :mergeJobId
         ];
     }
 }

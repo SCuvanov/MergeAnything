@@ -1,33 +1,33 @@
 import { LightningElement, api, wire } from 'lwc';
 import getAllMergeJobs from '@salesforce/apex/BulkMergeController.getAllMergeJobs';
 
-const ALL_MERGES = 'all_merges';
-const PENDING_MERGES = 'pending_merges';
-const IN_PROGRESS_MERGES = 'in_progress_merges';
-const COMPLETED_MERGES = 'completed_merges';
-const FAILED_MERGES = 'failed_merges';
+const ALL_MERGE_JOBS = 'all_merge_jobs';
+const PENDING_MERGE_JOBS = 'pending_merge_jobs';
+const IN_PROGRESS_MERGE_JOBS = 'in_progress_merge_jobs';
+const COMPLETED_MERGE_JOBS = 'completed_merge_jobs';
+const FAILED_MERGE_JOBS = 'failed_merge_jobs';
 
 const _columns = [
-    { label: 'Merge Number', fieldName: 'Name' },
-    { label: 'Merge Id', fieldName: 'Id' },
+    { label: 'Merge Job Number', fieldName: 'Name' },
+    { label: 'Merge Job Id', fieldName: 'Id' },
     { label: 'Status', fieldName: 'Status__c' },
     { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' },
 ];
 
 export default class MergeList extends LightningElement {
     _recordId;
-    _merges;
-    _filteredMerges;
-    _selectedMerge;
+    _mergeJobs;
+    _filteredMergeJobs;
+    _selectedMergeJob;
     _mergeView;
     _columns = _columns;
 
     constructor() {
         super();
-        this._merges = [];
-        this._filteredMerges = [];
-        this._selectedMerge = [];
-        this._mergeView = ALL_MERGES;
+        this._mergeJobs = [];
+        this._filteredMergeJobs = [];
+        this._selectedMergeJob = [];
+        this._mergeView = ALL_MERGE_JOBS;
     }
 
     @api
@@ -55,34 +55,34 @@ export default class MergeList extends LightningElement {
     @wire(getAllMergeJobs, {})
     wireAllMerges({ error, data }) {
         if (data) {
-            this._merges = data;
+            this._mergeJobs = data;
             this._error = undefined;
         } else if (error) {
             this._error = error;
-            this._merges = undefined;
+            this._mergeJobs = undefined;
         } else {
             this._error = undefined;
-            this._merges = undefined;
+            this._mergeJobs = undefined;
         }
 
         this.filterMerges();
     }
 
     filterMerges() {
-        if (!this._merges) {
+        if (!this._mergeJobs) {
             return;
         }
 
-        if (this._mergeView === undefined || this._mergeView === null || this._mergeView === ALL_MERGES) {
-            this._filteredMerges = this._merges;
-        } else if (this._mergeView === PENDING_MERGES) {
-            this._filteredMerges = this._merges.filter((merge) => merge.Status__c === 'Pending');
-        } else if (this._mergeView === IN_PROGRESS_MERGES) {
-            this._filteredMerges = this._merges.filter((merge) => merge.Status__c === 'In Progress');
-        } else if (this._mergeView === COMPLETED_MERGES) {
-            this._filteredMerges = this._merges.filter((merge) => merge.Status__c === 'Completed');
-        } else if (this._mergeView === FAILED_MERGES) {
-            this._filteredMerges = this._merges.filter((merge) => merge.Status__c === 'Failed');
+        if (this._mergeView === undefined || this._mergeView === null || this._mergeView === ALL_MERGE_JOBS) {
+            this._filteredMergeJobs = this._mergeJobs;
+        } else if (this._mergeView === PENDING_MERGE_JOBS) {
+            this._filteredMergeJobs = this._mergeJobs.filter((merge) => merge.Status__c === 'Pending');
+        } else if (this._mergeView === IN_PROGRESS_MERGE_JOBS) {
+            this._filteredMergeJobs = this._mergeJobs.filter((merge) => merge.Status__c === 'In Progress');
+        } else if (this._mergeView === COMPLETED_MERGE_JOBS) {
+            this._filteredMergeJobs = this._mergeJobs.filter((merge) => merge.Status__c === 'Completed');
+        } else if (this._mergeView === FAILED_MERGE_JOBS) {
+            this._filteredMergeJobs = this._mergeJobs.filter((merge) => merge.Status__c === 'Failed');
         }
 
         this.setSelectedMerge();
@@ -90,18 +90,18 @@ export default class MergeList extends LightningElement {
 
     setSelectedMerge() {
         if (
-            this._filteredMerges === undefined ||
-            this._filteredMerges === null ||
-            this._filteredMerges.length === 0 ||
-            this._filteredMerges.filter((merge) => merge.Id === this._recordId).length === 0
+            this._filteredMergeJobs === undefined ||
+            this._filteredMergeJobs === null ||
+            this._filteredMergeJobs.length === 0 ||
+            this._filteredMergeJobs.filter((merge) => merge.Id === this._recordId).length === 0
         ) {
-            this._selectedMerge = [];
+            this._selectedMergeJob = [];
         } else {
-            this._selectedMerge = [this._recordId];
+            this._selectedMergeJob = [this._recordId];
         }
     }
 
-    handleMergeSelection(event) {
+    handleMergeJobSelection(event) {
         if (
             event.detail.selectedRows === undefined ||
             event.detail.selectedRows === null ||
@@ -118,9 +118,9 @@ export default class MergeList extends LightningElement {
         this.setSelectedMerge();
 
         //DISPATCH MERGE SELECTED EVENT
-        const mergeSelectedEvent = new CustomEvent('mergeselection', {
+        const mergeJobSelectedEvent = new CustomEvent('mergejobselected', {
             detail: this._recordId,
         });
-        this.dispatchEvent(mergeSelectedEvent);
+        this.dispatchEvent(mergeJobSelectedEvent);
     }
 }

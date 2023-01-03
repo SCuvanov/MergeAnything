@@ -15,8 +15,8 @@ public class BulkMergeController {
     }
 
     @AuraEnabled(cacheable=true)
-    public static List<Merge_Item__c> getMergeItemsByMergeJobId(Id mergeId) {
-        return MergeItemSelector.getInstance().getMergeItemsByMergeJobId(mergeId);
+    public static List<Merge_Item__c> getMergeItemsByMergeJobId(Id mergeJobId) {
+        return MergeItemSelector.getInstance().getMergeItemsByMergeJobId(mergeJobId);
     }
 
     @AuraEnabled(cacheable=true)

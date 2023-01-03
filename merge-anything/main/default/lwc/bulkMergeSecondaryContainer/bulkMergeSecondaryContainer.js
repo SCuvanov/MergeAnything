@@ -8,35 +8,35 @@ import STATUS_FIELD from '@salesforce/schema/Merge_Job__c.Status__c';
 
 export default class BulkMergeSecondaryContainer extends LightningElement {
     @api recordId;
-    _merge;
+    _mergeJob;
 
     @wire(getRecord, {
         recordId: '$recordId',
         fields: [ID_FIELD, NAME_FIELD, STATUS_FIELD],
     })
-    wireMerge({ error, data }) {
+    wireMergeJob({ error, data }) {
         if (data) {
-            this._merge = data;
+            this._mergeJob = data;
             this._error = undefined;
         } else if (error) {
             this._error = error;
-            this._merge = undefined;
+            this._mergeJob = undefined;
         } else {
             this._error = undefined;
-            this._merge = undefined;
+            this._mergeJob = undefined;
         }
     }
 
-    get _mergeId() {
-        return getFieldValue(this._merge, ID_FIELD);
+    get _mergeJobId() {
+        return getFieldValue(this._mergeJob, ID_FIELD);
     }
 
-    get _mergeName() {
-        return getFieldValue(this._merge, NAME_FIELD);
+    get _mergeJobName() {
+        return getFieldValue(this._mergeJob, NAME_FIELD);
     }
 
-    get _mergeStatus() {
-        return getFieldValue(this._merge, STATUS_FIELD);
+    get _mergeJobStatus() {
+        return getFieldValue(this._mergeJob, STATUS_FIELD);
     }
 
     handleRefresh(event) {

@@ -28,17 +28,17 @@ public with sharing class MergeJobSelector {
      * @return        The single `Merge_Job__c` record
      */
     public Merge_Job__c getNewestMergeJob() {
-        List<Merge_Job__c> merges = [
+        List<Merge_Job__c> mergeJobs = [
             SELECT Id, CreatedDate, Name, Status__c
             FROM Merge_Job__c
             ORDER BY CreatedDate DESC
         ];
 
-        if (merges == null || merges.isEmpty()) {
+        if (mergeJobs == null || mergeJobs.isEmpty()) {
             return null;
         }
 
-        return merges[0];
+        return mergeJobs[0];
     }
 
     /**
@@ -46,17 +46,17 @@ public with sharing class MergeJobSelector {
      * @return        The Id of a single `Merge_Job__c` record
      */
     public Id getNewestMergeJobId() {
-        List<Merge_Job__c> merges = [
+        List<Merge_Job__c> mergeJobs = [
             SELECT Id, CreatedDate, Name, Status__c
             FROM Merge_Job__c
             ORDER BY CreatedDate DESC
         ];
 
-        if (merges == null || merges.isEmpty()) {
+        if (mergeJobs == null || mergeJobs.isEmpty()) {
             return null;
         }
 
-        return merges[0].Id;
+        return mergeJobs[0].Id;
     }
 
     /**
@@ -64,16 +64,16 @@ public with sharing class MergeJobSelector {
      * @return        The List of `Merge_Job__c` records
      */
     public List<Merge_Job__c> getAllMergeJobs() {
-        List<Merge_Job__c> merges = [
+        List<Merge_Job__c> mergeJobs = [
             SELECT Id, CreatedDate, Name, Status__c
             FROM Merge_Job__c
             ORDER BY CreatedDate DESC
         ];
 
-        if (merges == null || merges.isEmpty()) {
+        if (mergeJobs == null || mergeJobs.isEmpty()) {
             return null;
         }
 
-        return merges;
+        return mergeJobs;
     }
 }
