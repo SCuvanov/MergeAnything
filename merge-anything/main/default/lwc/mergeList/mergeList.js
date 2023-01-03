@@ -1,5 +1,5 @@
 import { LightningElement, api, wire } from 'lwc';
-import getAllMerges from '@salesforce/apex/BulkMergeController.getAllMerges';
+import getAllMergeJobs from '@salesforce/apex/BulkMergeController.getAllMergeJobs';
 
 const ALL_MERGES = 'all_merges';
 const PENDING_MERGES = 'pending_merges';
@@ -52,7 +52,7 @@ export default class MergeList extends LightningElement {
         this.filterMerges();
     }
 
-    @wire(getAllMerges, {})
+    @wire(getAllMergeJobs, {})
     wireAllMerges({ error, data }) {
         if (data) {
             this._merges = data;
