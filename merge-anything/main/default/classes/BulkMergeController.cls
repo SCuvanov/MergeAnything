@@ -20,7 +20,7 @@ public class BulkMergeController {
     }
 
     @AuraEnabled(cacheable=true)
-    public static Id createNewMerge() {
+    public static Id createNewMergeJob() {
         return null;
     }
 }
