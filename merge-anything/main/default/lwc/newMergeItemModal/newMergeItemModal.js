@@ -1,3 +1,15 @@
-import { LightningElement } from 'lwc';
+import { api } from 'lwc';
+import LightningModal from 'lightning/modal';
 
-export default class NewMergeItemModal extends LightningElement {}
+const SUCCESS = 'success';
+
+export default class NewMergeItemModal extends LightningModal {
+    handleCancel() {
+        this.close();
+    }
+
+    handleSave() {
+        this.close(SUCCESS);
+        //TODO: Pass a merge item object to the close method
+    }
+}

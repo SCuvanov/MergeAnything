@@ -3,6 +3,7 @@ import { getRecord } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import createMergeJob from '@salesforce/apex/BulkMergeController.createMergeJob';
 import NewMergeJobModal from 'c/newMergeJobModal';
+import NewMergeItemModal from 'c/newMergeItemModal';
 
 const MERGE_JOBS = 'merge_jobs';
 const MERGE_ITEMS = 'merge_items';
@@ -20,7 +21,7 @@ const SUCCESS = 'success';
 
 //UI
 const NEW_MERGE_JOB_BTN_ID = 'lightning-button[data-id=newMergeJobBtn]';
-const ADD_MERGE_ITEM_BTN_ID = 'lightning-button[data-id=addMergeItemBtn]';
+const NEW_MERGE_ITEM_BTN_ID = 'lightning-button[data-id=newMergeItemBtn]';
 
 //EVENTS
 const MERGE_JOB_CREATED_EVENT = 'mergejobcreated';
@@ -106,7 +107,15 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         }
     }
 
-    async handleAddMergeItem() {}
+    async handleNewMergeItem() {
+        const result = await NewMergeItemModal.open({
+            size: 'medium'
+        });
+
+        if (result === SUCCESS) {
+            //this.createMergeJob();
+        }
+    }
 
     handleMergeView(event) {
         this._mergeView = event.detail.value;
@@ -143,12 +152,12 @@ export default class BulkMergePrimaryContainer extends LightningElement {
     toggleMergeOptionView(value) {
         if (value === MERGE_JOBS) {
             this.template.querySelector(NEW_MERGE_JOB_BTN_ID).hidden = false;
-            this.template.querySelector(ADD_MERGE_ITEM_BTN_ID).hidden = true;
+            this.template.querySelector(NEW_MERGE_ITEM_BTN_ID).hidden = true;
             this._mergeView = ALL_MERGE_JOBS;
             this._showMergeJobList = true;
         } else {
             this.template.querySelector(NEW_MERGE_JOB_BTN_ID).hidden = true;
-            this.template.querySelector(ADD_MERGE_ITEM_BTN_ID).hidden = false;
+            this.template.querySelector(NEW_MERGE_ITEM_BTN_ID).hidden = false;
             this._mergeView = ALL_MERGE_ITEMS;
             this._showMergeJobList = false;
         }

@@ -1,3 +1,23 @@
 <template>
-    
+    <lightning-modal-header label="New Merge Job"></lightning-modal-header>
+    <lightning-modal-body>
+        <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center">
+            <div>
+                <lightning-formatted-text class="slds-text-heading_small"
+                    value="You are about to create a new Merge Item. Are you sure you want to do this?"></lightning-formatted-text>
+            </div>
+            <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-top_small">
+                <lightning-icon class="slds-m-right_x-small" icon-name="utility:info" alternative-text="info"
+                    title="info" size="x-small"></lightning-icon>
+                <lightning-formatted-text class="slds-text-color_weak"
+                    value="A Merge Item is a representation of 2 records to be merged."></lightning-formatted-text>
+            </div>
+        </div>
+        <div class="slds-border_bottom slds-m-top_small"></div>
+    </lightning-modal-body>
+    <lightning-modal-footer>
+        <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
+        <lightning-button class="slds-m-left_xx-small" label="Save" variant="brand"
+            onclick={handleSave}></lightning-button>
+    </lightning-modal-footer>
 </template>
