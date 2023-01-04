@@ -18,7 +18,7 @@ const _columns = [
     { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' }
 ];
 
-export default class MergeList extends LightningElement {
+export default class MergeJobList extends LightningElement {
     _recordId;
     _mergeJobs;
     _filteredMergeJobs;

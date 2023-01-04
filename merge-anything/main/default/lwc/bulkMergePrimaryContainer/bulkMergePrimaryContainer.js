@@ -106,9 +106,7 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         }
     }
 
-    async handleAddMergeItem() {
-        console.log('Add Merge Item Clicked');
-    }
+    async handleAddMergeItem() {}
 
     handleMergeView(event) {
         this._mergeView = event.detail.value;
@@ -139,7 +137,7 @@ export default class BulkMergePrimaryContainer extends LightningElement {
     }
 
     handleMergeJobSelected(event) {
-        this.dispatchMergeJobSelectedEvent(event.detail, MERGE_JOB_SELECTED_EVENT);
+        this.dispatchMergeJobEvent(event.detail, MERGE_JOB_SELECTED_EVENT);
     }
 
     toggleMergeOptionView(value) {

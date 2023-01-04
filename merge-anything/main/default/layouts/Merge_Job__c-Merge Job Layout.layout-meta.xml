@@ -50,7 +50,12 @@
         <style>CustomLinks</style>
     </layoutSections>
     <relatedLists>
+        <excludeButtons>MassChangeOwner</excludeButtons>
+        <excludeButtons>New</excludeButtons>
         <fields>NAME</fields>
+        <fields>Primary_Record_Id__c</fields>
+        <fields>Secondary_Record_Id__c</fields>
+        <fields>Status__c</fields>
         <relatedList>Merge_Item__c.Merge_Job__c</relatedList>
     </relatedLists>
     <showEmailCheckbox>false</showEmailCheckbox>

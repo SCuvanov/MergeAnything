@@ -24,8 +24,8 @@
 
         <template if:true={_showMergeJobList}>
           <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
-            <c-merge-list record-id={recordId} merge-view={_mergeView}
-              onmergejobselected={handleMergeJobSelected}></c-merge-list>
+            <c-merge-job-list record-id={recordId} merge-view={_mergeView}
+              onmergejobselected={handleMergeJobSelected}></c-merge-job-list>
           </div>
         </template>
         <template if:false={_showMergeJobList}>
