@@ -19,8 +19,8 @@ public class BulkMergeController {
         return MergeItemSelector.getInstance().getMergeItemsByMergeJobId(mergeJobId);
     }
 
-    @AuraEnabled(cacheable=true)
-    public static Id createNewMergeJob() {
-        return null;
+    @AuraEnabled
+    public static MergeJob createMergeJob() {
+        return new MergeJob().create();
     }
 }

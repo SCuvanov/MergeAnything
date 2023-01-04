@@ -1,4 +1,5 @@
 import { LightningElement, api, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
 import getAllMergeJobs from '@salesforce/apex/BulkMergeController.getAllMergeJobs';
 
 const ALL_MERGE_JOBS = 'all_merge_jobs';
@@ -7,17 +8,21 @@ const IN_PROGRESS_MERGE_JOBS = 'in_progress_merge_jobs';
 const COMPLETED_MERGE_JOBS = 'completed_merge_jobs';
 const FAILED_MERGE_JOBS = 'failed_merge_jobs';
 
+//EVENTS
+const MERGE_JOB_SELECTED_EVENT = 'mergejobselected';
+
 const _columns = [
     { label: 'Merge Job Number', fieldName: 'Name' },
     { label: 'Merge Job Id', fieldName: 'Id' },
     { label: 'Status', fieldName: 'Status__c' },
-    { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' },
+    { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' }
 ];
 
 export default class MergeList extends LightningElement {
     _recordId;
     _mergeJobs;
     _filteredMergeJobs;
+    _wiredMergeJobs;
     _selectedMergeJob;
     _mergeView;
     _columns = _columns;
@@ -26,6 +31,7 @@ export default class MergeList extends LightningElement {
         super();
         this._mergeJobs = [];
         this._filteredMergeJobs = [];
+        this._wiredMergeJobs = null;
         this._selectedMergeJob = [];
         this._mergeView = ALL_MERGE_JOBS;
     }
@@ -38,6 +44,10 @@ export default class MergeList extends LightningElement {
     set recordId(value) {
         this.setAttribute('record-id', value);
         this._recordId = value;
+
+        if (this._wiredMergeJobs && this._wiredMergeJobs.data) {
+            refreshApex(this._wiredMergeJobs);
+        }
     }
 
     @api
@@ -53,12 +63,14 @@ export default class MergeList extends LightningElement {
     }
 
     @wire(getAllMergeJobs, {})
-    wireAllMerges({ error, data }) {
-        if (data) {
-            this._mergeJobs = data;
+    wireAllMerges(result) {
+        this._wiredMergeJobs = result;
+
+        if (result.data) {
+            this._mergeJobs = result.data;
             this._error = undefined;
-        } else if (error) {
-            this._error = error;
+        } else if (result.error) {
+            this._error = result.error;
             this._mergeJobs = undefined;
         } else {
             this._error = undefined;
@@ -101,7 +113,7 @@ export default class MergeList extends LightningElement {
         }
     }
 
-    handleMergeJobSelection(event) {
+    handleMergeJobSelected(event) {
         if (
             event.detail.selectedRows === undefined ||
             event.detail.selectedRows === null ||
@@ -118,8 +130,8 @@ export default class MergeList extends LightningElement {
         this.setSelectedMerge();
 
         //DISPATCH MERGE SELECTED EVENT
-        const mergeJobSelectedEvent = new CustomEvent('mergejobselected', {
-            detail: this._recordId,
+        const mergeJobSelectedEvent = new CustomEvent(MERGE_JOB_SELECTED_EVENT, {
+            detail: this._recordId
         });
         this.dispatchEvent(mergeJobSelectedEvent);
     }

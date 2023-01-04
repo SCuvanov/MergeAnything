@@ -1,5 +1,5 @@
-import { LightningElement, wire } from 'lwc';
-import getNewestMergeJobId from '@salesforce/apex/BulkMergeController.getNewestMergeJobId';
+import { LightningElement, wire } from "lwc";
+import getNewestMergeJobId from "@salesforce/apex/BulkMergeController.getNewestMergeJobId";
 
 export default class BulkMergeMasterContainer extends LightningElement {
     _recordId;
@@ -19,7 +19,11 @@ export default class BulkMergeMasterContainer extends LightningElement {
         }
     }
 
-    handleMergeJobSelection(event) {
+    handleMergeJobSelected(event) {
+        this._recordId = event.detail;
+    }
+
+    handleMergeJobCreated(event) {
         this._recordId = event.detail;
     }
 }

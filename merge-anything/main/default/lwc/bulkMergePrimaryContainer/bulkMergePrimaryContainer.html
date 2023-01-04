@@ -9,7 +9,7 @@
         </div>
         <div class="slds-col">
           <lightning-button data-id="newMergeJobBtn" variant="neutral" label="New Merge Job" title="New Merge"
-            icon-name="utility:add" onclick={handleNewMerge}></lightning-button>
+            icon-name="utility:add" onclick={handleNewMergeJob}></lightning-button>
           <lightning-button data-id="addMergeItemBtn" variant="neutral" label="Add Merge Item" title="Add Merge Item"
             icon-name="utility:add" onclick={handleAddMergeItem} hidden></lightning-button>
         </div>
@@ -25,7 +25,7 @@
         <template if:true={_showMergeJobList}>
           <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
             <c-merge-list record-id={recordId} merge-view={_mergeView}
-              onmergejobselected={handleMergeJobSelection}></c-merge-list>
+              onmergejobselected={handleMergeJobSelected}></c-merge-list>
           </div>
         </template>
         <template if:false={_showMergeJobList}>

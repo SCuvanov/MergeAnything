@@ -15,6 +15,15 @@ public with sharing class MergeJobSelector {
     }
 
     /**
+     * @description Returns a single `Merge_Job__c` record
+     * @param  mergeId A single `Id` of the `Merge_Job__c` record to query
+     * @return        A `Merge_Job__c` record matching the provided mergeId
+     */
+    public Merge_Job__c getMergeJobById(Id mergeId) {
+        return [SELECT Id, Name, Link__c, Status__c FROM Merge_Job__c WHERE Id = :mergeId];
+    }
+
+    /**
      * @description Returns a list of `Merge_Job__c` records
      * @param  mergeIds The list of `ID` of the `Merge_Job__c` records to query
      * @return        The list of matching `Merge_Job__c` records
