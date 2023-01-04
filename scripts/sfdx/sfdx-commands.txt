@@ -1,0 +1,8 @@
+// Align project with package.xml
+sfdx force:source:retrieve -u {DEFAULT_SCRATCH_ORG_NAME} -x ./package.xml
+
+// Pull metadata changes from scratch org
+sfdx force:source:pull -u {DEFAULT_SCRATCH_ORG_NAME} -f
+
+// Push metadata changes to scratch org
+sfdx force:source:push -u {DEFAULT_SCRATCH_ORG_NAME} -f
