@@ -6,6 +6,11 @@
     </applicationVisibilities>
     <description>Administrative access to the Merge Anything App.</description>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Merge_Item__c.Link__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Merge_Item__c.Merged_Record_JSON__c</field>
         <readable>true</readable>
@@ -21,6 +26,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Merge_Item__c.Primary_Record_Link__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Merge_Item__c.Secondary_Record_Id__c</field>
         <readable>true</readable>
@@ -31,8 +41,18 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Merge_Item__c.Secondary_Record_Link__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Merge_Item__c.Status__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Merge_Job__c.Link__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
