@@ -1,5 +1,6 @@
 import { api } from 'lwc';
 import LightningModal from 'lightning/modal';
+import createMergeItem from '@salesforce/apex/BulkMergeController.createMergeItem';
 
 const SUCCESS = 'success';
 
@@ -9,7 +10,14 @@ export default class NewMergeItemModal extends LightningModal {
     }
 
     handleSave() {
-        this.close(SUCCESS);
-        //TODO: Pass a merge item object to the close method
+        createMergeItem()
+            .then((result) => {
+                if (result && result.mergeItem) {
+                    this.close({ status: SUCCESS, mergeItem: result.mergeItem });
+                }
+            })
+            .catch((error) => {
+                this.close({ status: ERROR, error: error });
+            });
     }
 }

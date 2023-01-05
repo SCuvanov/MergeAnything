@@ -10,10 +10,26 @@
                 <lightning-icon class="slds-m-right_x-small" icon-name="utility:info" alternative-text="info"
                     title="info" size="x-small"></lightning-icon>
                 <lightning-formatted-text class="slds-text-color_weak"
-                    value="A Merge Item is a representation of 2 records to be merged."></lightning-formatted-text>
+                    value="A Merge Item represents the details of two records to be merged."></lightning-formatted-text>
             </div>
         </div>
         <div class="slds-border_bottom slds-m-top_small"></div>
+        <div class="slds-grid slds-grid_align-space">
+            <div
+                class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center slds-m-top_small">
+                <lightning-formatted-text class="slds-col slds-text-heading_small"
+                    value="Primary Record Details"></lightning-formatted-text>
+                <lightning-input name="enter-search" label="Search when user hits the 'enter' key"
+                    type="search"></lightning-input>
+            </div>
+            <div
+                class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center slds-m-top_small">
+                <lightning-formatted-text class="slds-col slds-text-heading_small"
+                    value="Secondary Record Details"></lightning-formatted-text>
+                <lightning-combobox name="progress" label="Seconday Record" value={value} placeholder="Select Progress"
+                    options={options} onchange={handleChange}></lightning-combobox>
+            </div>
+        </div>
     </lightning-modal-body>
     <lightning-modal-footer>
         <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>

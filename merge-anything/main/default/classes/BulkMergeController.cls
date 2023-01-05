@@ -23,4 +23,9 @@ public class BulkMergeController {
     public static MergeJob createMergeJob() {
         return new MergeJob().create();
     }
+
+    @AuraEnabled
+    public static MergeItem createMergeItem() {
+        return null; //new MergeItem().create();
+    }
 }

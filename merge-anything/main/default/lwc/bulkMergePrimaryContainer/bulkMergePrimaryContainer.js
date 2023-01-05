@@ -102,19 +102,53 @@ export default class BulkMergePrimaryContainer extends LightningElement {
             size: 'small'
         });
 
-        if (result === SUCCESS) {
-            this.createMergeJob();
+        if (!result) {
+            return;
         }
+
+        if (result.status === SUCCESS && result.mergeJob) {
+            this.dispatchMergeJobEvent(result.mergeJob.Id, MERGE_JOB_CREATED_EVENT);
+            this.showToastEvent(
+                null,
+                'Merge Job "{0}" was created.',
+                [
+                    {
+                        url: result.mergeJob.Link__c,
+                        label: result.mergeJob.Name
+                    }
+                ],
+                'success'
+            );
+        }
+
+        //TODO: HANDLE ERROR
     }
 
     async handleNewMergeItem() {
         const result = await NewMergeItemModal.open({
-            size: 'medium'
+            size: 'small'
         });
 
-        if (result === SUCCESS) {
-            //this.createMergeJob();
+        if (!result) {
+            return;
         }
+
+        if (result.status === SUCCESS && result.mergeItem) {
+            //this.dispatchMergeJobEvent(result.mergeJob.Id, MERGE_JOB_CREATED_EVENT);
+            this.showToastEvent(
+                null,
+                'Merge Item "{0}" was created.',
+                [
+                    {
+                        url: result.mergeItem.Link__c,
+                        label: result.mergeItem.Name
+                    }
+                ],
+                'success'
+            );
+        }
+
+        //TODO: HANDLE ERROR
     }
 
     handleMergeView(event) {
