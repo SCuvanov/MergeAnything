@@ -28,4 +28,14 @@ public class BulkMergeController {
     public static MergeItem createMergeItem() {
         return null; //new MergeItem().create();
     }
+
+    @AuraEnabled(cacheable=true)
+    public static List<EntityDefinition> getEntityDefinitionsByLabel(String label) {
+        return EntityDefinitionSelector.getInstance().getEntityDefinitionsByLabel(label);
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<EntityDefinition> getAllEntityDefinitions() {
+        return EntityDefinitionSelector.getInstance().getAllEntityDefinitions();
+    }
 }

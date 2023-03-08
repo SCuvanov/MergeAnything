@@ -13,21 +13,43 @@
                     value="A Merge Item represents the details of two records to be merged."></lightning-formatted-text>
             </div>
         </div>
-        <div class="slds-border_bottom slds-m-top_small"></div>
+        <div class="slds-border_bottom slds-m-top_small slds-m-bottom_medium"></div>
         <div class="slds-grid slds-grid_align-space">
-            <div
-                class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center slds-m-top_small">
-                <lightning-formatted-text class="slds-col slds-text-heading_small"
-                    value="Primary Record Details"></lightning-formatted-text>
-                <lightning-input name="enter-search" label="Search when user hits the 'enter' key"
-                    type="search"></lightning-input>
+            <div class="slds-grid slds-grid_vertical">
+                <div class="slds-grid slds-grid_align-center slds-m-bottom_x-small">
+                    <lightning-formatted-text class="slds-text-heading_small"
+                        value="Primary Record Details"></lightning-formatted-text>
+                </div>
+                <!--
+                <lightning-combobox class="slds-m-bottom_x-small" name="entityDefinition" label="Object Label" value=""
+                    placeholder="Select Object Label" options={_entityDefinitions}
+                    onchange={handleEntityDefinitionChange} required></lightning-combobox>
+                -->
+                <c-searchable-combobox class="slds-m-bottom_x-small" label="Object Name"></c-searchable-combobox>
+                <!--
+                <lightning-input data-id="entityDefinitionInput" class="slds-m-bottom_x-small" name="enter-search"
+                    label="SObject Name" type="search" placeholder="Press 'Enter' to Search"
+                    value={_entityDefinitionSearchValue} onchange={handleInputChange}
+                    onkeyup={handleKeyUp}></lightning-input>
+                -->
+                <lightning-input data-id="primaryRecordInput" name="enter-search" label="Primary Record" type="search"
+                    placeholder="Press 'Enter' to Search" value={_primarySearchValue} onchange={handleInputChange}
+                    onkeyup={handleKeyUp}></lightning-input>
             </div>
-            <div
-                class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center slds-m-top_small">
-                <lightning-formatted-text class="slds-col slds-text-heading_small"
-                    value="Secondary Record Details"></lightning-formatted-text>
-                <lightning-combobox name="progress" label="Seconday Record" value={value} placeholder="Select Progress"
-                    options={options} onchange={handleChange}></lightning-combobox>
+            <div class="slds-grid slds-grid_vertical">
+                <div class="slds-grid slds-grid_align-center slds-m-bottom_x-small">
+                    <lightning-formatted-text class="slds-text-heading_small"
+                        value="Secondary Record Details"></lightning-formatted-text>
+                </div>
+                <c-searchable-combobox class="slds-m-bottom_x-small" label="Object Name"
+                    style="visibility: hidden;"></c-searchable-combobox>
+                <!--
+                <lightning-input class="slds-m-bottom_x-small" style="visibility: hidden;" name="enter-search"
+                    label="Dummy Label" type="search" placeholder="Dummy Placeholder"></lightning-input>
+                    -->
+                <lightning-input data-id="secondaryRecordInput" name="enter-search" label="Secondary Record"
+                    type="search" placeholder="Press 'Enter' to Search" value={_secondarySearchValue}
+                    onchange={handleInputChange} onkeyup={handleKeyUp} disabled></lightning-input>
             </div>
         </div>
     </lightning-modal-body>

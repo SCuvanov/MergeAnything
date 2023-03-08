@@ -1,0 +1,37 @@
+<template>
+    <div class="slds-form-element">
+        <div class="slds-form-element__control">
+            <div class="slds-combobox_container">
+                <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open">
+                    <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
+                        <lightning-input data-id="searchInput" name="enter-search" label={label} type="search"
+                            placeholder="Press 'Enter' to Search" value={_searchValue} onchange={handleOnChange}
+                            oncommit={handleOnCommit}></lightning-input>
+                    </div>
+                    <template if:true={_showDropdown}>
+                        <div id="listbox-id-15" class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid"
+                            role="listbox">
+                            <ul class="slds-listbox slds-listbox_vertical" role="presentation">
+                                <template for:each={_items} for:item="item">
+                                    <li data-id={item.Id} data-label={item.MasterLabel} data-api={item.QualifiedApiName}
+                                        key={item.Id} role="presentation" class="slds-listbox__item"
+                                        onclick={handleOnClick}>
+                                        <div class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta"
+                                            role="option">
+                                            <span class="slds-media__body">
+                                                <span
+                                                    class="slds-listbox__option-text slds-listbox__option-text_entity">{item.MasterLabel}</span>
+                                                <span
+                                                    class="slds-listbox__option-meta slds-listbox__option-meta_entity">{item.QualifiedApiName}</span>
+                                            </span>
+                                        </div>
+                                    </li>
+                                </template>
+                            </ul>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</template>

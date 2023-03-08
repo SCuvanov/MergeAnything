@@ -1,4 +1,4 @@
-public with sharing class MergeJobSelector {
+public class MergeJobSelector {
     private static MergeJobSelector instance = new MergeJobSelector();
 
     @SuppressWarnings('PMD.EmptyStatementBlock')

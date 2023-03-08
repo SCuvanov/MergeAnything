@@ -1,4 +1,4 @@
-public with sharing class MergeItem {
+public class MergeItem {
     public MergeItem() {
     }
 }
