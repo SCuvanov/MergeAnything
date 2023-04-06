@@ -4,7 +4,10 @@ import getEntityDefinitionsByLabel from '@salesforce/apex/BulkMergeController.ge
 //UI
 const SEARCH_INPUT_ID = 'searchInput';
 
-export default class SearchableCombobox extends LightningElement {
+//EVENTS
+const ITEM_SELECTED_EVENT = 'itemselected';
+
+export default class SObjectSearchableCombobox extends LightningElement {
     @api label;
 
     _searchValue;
@@ -13,11 +16,6 @@ export default class SearchableCombobox extends LightningElement {
     _showDropdown = false;
     _selectedItemLabel;
     _selectedItemApiName;
-
-    //TODO: Can we pass in dynamic wire functions?
-    //TODO: Handle List Item Select
-    //TODO: Pass List Item Value back to Parent
-    //TODO: Is it possible to expand the modal to show the list items?
 
     @wire(getEntityDefinitionsByLabel, { label: '$_searchValueTemp' })
     wireEntityDefinitions({ error, data }) {
@@ -50,6 +48,8 @@ export default class SearchableCombobox extends LightningElement {
     handleOnClick(event) {
         this._selectedItemLabel = event.currentTarget.dataset.label;
         this._selectedItemApiName = event.currentTarget.dataset.api;
+
+        this.setSelectedItem();
     }
 
     setSearchState() {
@@ -66,5 +66,23 @@ export default class SearchableCombobox extends LightningElement {
         }
     }
 
-    set;
+    setSelectedItem() {
+        this._searchValue = this._selectedItemLabel;
+        this._items = [];
+        this._showDropdown = false;
+
+        let selectedItem = {
+            label: this._selectedItemLabel,
+            apiName: this._selectedItemApiName
+        };
+
+        this.dispatchItemSelectedEvent(selectedItem, ITEM_SELECTED_EVENT);
+    }
+
+    dispatchItemSelectedEvent(selectedItem, eventName) {
+        const mergeJobEvent = new CustomEvent(eventName, {
+            detail: selectedItem
+        });
+        this.dispatchEvent(mergeJobEvent);
+    }
 }

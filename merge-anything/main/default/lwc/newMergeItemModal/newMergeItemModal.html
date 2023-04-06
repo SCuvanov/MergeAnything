@@ -20,36 +20,25 @@
                     <lightning-formatted-text class="slds-text-heading_small"
                         value="Primary Record Details"></lightning-formatted-text>
                 </div>
-                <!--
-                <lightning-combobox class="slds-m-bottom_x-small" name="entityDefinition" label="Object Label" value=""
-                    placeholder="Select Object Label" options={_entityDefinitions}
-                    onchange={handleEntityDefinitionChange} required></lightning-combobox>
-                -->
-                <c-searchable-combobox class="slds-m-bottom_x-small" label="Object Name"></c-searchable-combobox>
-                <!--
-                <lightning-input data-id="entityDefinitionInput" class="slds-m-bottom_x-small" name="enter-search"
-                    label="SObject Name" type="search" placeholder="Press 'Enter' to Search"
-                    value={_entityDefinitionSearchValue} onchange={handleInputChange}
-                    onkeyup={handleKeyUp}></lightning-input>
-                -->
-                <lightning-input data-id="primaryRecordInput" name="enter-search" label="Primary Record" type="search"
-                    placeholder="Press 'Enter' to Search" value={_primarySearchValue} onchange={handleInputChange}
-                    onkeyup={handleKeyUp}></lightning-input>
+
+                <c-s-object-searchable-combobox class="slds-m-bottom_x-small" label="Object Name"
+                    onitemselected={handleSObjectSelected}></c-s-object-searchable-combobox>
+
+                <c-record-searchable-combobox class="slds-m-bottom_x-small" label="Primary Record"
+                    sobject-api-name={_sobjectApiName}
+                    onitemselected={handlePrimaryRecordSelected}></c-record-searchable-combobox>
+
             </div>
             <div class="slds-grid slds-grid_vertical">
                 <div class="slds-grid slds-grid_align-center slds-m-bottom_x-small">
                     <lightning-formatted-text class="slds-text-heading_small"
                         value="Secondary Record Details"></lightning-formatted-text>
                 </div>
-                <c-searchable-combobox class="slds-m-bottom_x-small" label="Object Name"
-                    style="visibility: hidden;"></c-searchable-combobox>
-                <!--
-                <lightning-input class="slds-m-bottom_x-small" style="visibility: hidden;" name="enter-search"
-                    label="Dummy Label" type="search" placeholder="Dummy Placeholder"></lightning-input>
-                    -->
-                <lightning-input data-id="secondaryRecordInput" name="enter-search" label="Secondary Record"
-                    type="search" placeholder="Press 'Enter' to Search" value={_secondarySearchValue}
-                    onchange={handleInputChange} onkeyup={handleKeyUp} disabled></lightning-input>
+                <c-s-object-searchable-combobox class="slds-m-bottom_x-small" label="Object Name"
+                    style="visibility: hidden;"></c-s-object-searchable-combobox>
+
+                <c-record-searchable-combobox class="slds-m-bottom_x-small" label="Secondary Record"
+                    onitemselected={handleSecondaryRecordSelected}></c-record-searchable-combobox>
             </div>
         </div>
     </lightning-modal-body>
