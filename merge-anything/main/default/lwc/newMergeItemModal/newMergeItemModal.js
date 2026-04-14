@@ -1,4 +1,3 @@
-import { wire } from 'lwc';
 import LightningModal from 'lightning/modal';
 import createMergeItem from '@salesforce/apex/BulkMergeController.createMergeItem';
 

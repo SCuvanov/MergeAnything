@@ -15,20 +15,20 @@
         </div>
       </div>
 
-      <template if:true={_mergeJob}>
+      <template lwc:if={_mergeJob}>
         <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
           <lightning-combobox name="merge_views" label="Show Me" value={_mergeView} placeholder="Select View"
             options={_mergeViews} onchange={handleMergeView}>
           </lightning-combobox>
         </div>
 
-        <template if:true={_showMergeJobList}>
+        <template lwc:if={_showMergeJobList}>
           <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
             <c-merge-job-list record-id={recordId} merge-view={_mergeView}
               onmergejobselected={handleMergeJobSelected}></c-merge-job-list>
           </div>
         </template>
-        <template if:false={_showMergeJobList}>
+        <template lwc:else>
           <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
             <c-merge-item-list record-id={recordId} merge-view={_mergeView}></c-merge-item-list>
           </div>

@@ -9,10 +9,6 @@
 		<name>AppMenu</name>
 	</types>
 	<types>
-		<members>*</members>
-		<name>AuraDefinitionBundle</name>
-	</types>
-	<types>
 		<members>Merge_Anything</members>
 		<name>CustomApplication</name>
 	</types>
@@ -58,5 +54,5 @@
 		<members>Admin</members>
 		<name>Profile</name>
 	</types>
-	<version>55.0</version>
+	<version>64.0</version>
 </Package>

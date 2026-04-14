@@ -1,4 +1,3 @@
-import { api } from 'lwc';
 import LightningModal from 'lightning/modal';
 import createMergeJob from '@salesforce/apex/BulkMergeController.createMergeJob';
 

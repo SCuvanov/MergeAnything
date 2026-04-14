@@ -39,9 +39,9 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
         return getFieldValue(this._mergeJob, STATUS_FIELD);
     }
 
-    handleRefresh(event) {
+    handleRefresh() {
         getRecordNotifyChange([{ recordId: this.recordId }]);
     }
 
-    handleStart(event) {}
+    handleStart() {}
 }

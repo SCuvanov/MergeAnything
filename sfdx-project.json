@@ -8,5 +8,5 @@
   "name": "MergeAnything",
   "namespace": "",
   "sfdcLoginUrl": "https://login.salesforce.com",
-  "sourceApiVersion": "55.0"
+  "sourceApiVersion": "64.0"
 }
