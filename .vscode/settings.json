@@ -4,5 +4,6 @@
     "**/bower_components": true,
     "**/.sfdx": true
   },
-  "html.format.indentInnerHtml": false
+  "html.format.indentInnerHtml": false,
+  "xml.preferences.showSchemaDocumentationType": "none"
 }

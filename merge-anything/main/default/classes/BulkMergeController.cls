@@ -38,4 +38,14 @@ public class BulkMergeController {
     public static List<EntityDefinition> getAllEntityDefinitions() {
         return EntityDefinitionSelector.getInstance().getAllEntityDefinitions();
     }
+
+    /**
+     * @param sObjectApiName Qualified API name of the sObject to query (e.g. Account, Custom__c)
+     * @param name           Name search value used when the object supports Name filtering
+     * @return Search options normalized to always return Id + Name
+     */
+    @AuraEnabled(cacheable=true)
+    public static List<RecordSelector.RecordSearchOption> getRecordsWithEditableFields(String sObjectApiName, String name) {
+        return RecordSelector.getInstance().getRecordSearchOptions(sObjectApiName, name, null);
+    }
 }
