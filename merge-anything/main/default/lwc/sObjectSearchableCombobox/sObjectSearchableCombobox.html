@@ -1,5 +1,5 @@
 <template>
-    <div class="slds-form-element">
+    <div class={formElementClass}>
         <div class="slds-form-element__control">
             <div class="slds-combobox_container">
                 <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open">
@@ -16,7 +16,7 @@
                                 <template for:each={_items} for:item="item">
                                     <li data-id={item.Id} data-label={item.MasterLabel} data-api={item.QualifiedApiName}
                                         key={item.Id} role="presentation" class="slds-listbox__item"
-                                        onclick={handleOnClick}>
+                                        onmousedown={handleOptionMouseDown}>
                                         <div class="slds-media slds-listbox__option slds-listbox__option_entity slds-listbox__option_has-meta"
                                             role="option">
                                             <span class="slds-media__body">

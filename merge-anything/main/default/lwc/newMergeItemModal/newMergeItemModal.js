@@ -30,25 +30,35 @@ export default class NewMergeItemModal extends LightningModal {
     }
 
     handleSObjectSelected(event) {
-        this._sobjectApiName = event.detail.apiName;
-        console.log('SObject Selected: ' + this._sobjectApiName);
+        const api = event.detail?.apiName;
+        const previous = this._sobjectApiName;
+        this._sobjectApiName = api || undefined;
+
+        if (!this._sobjectApiName || (previous && previous !== this._sobjectApiName)) {
+            this._primaryRecord = undefined;
+            this._secondaryRecord = undefined;
+        }
     }
 
     handlePrimaryRecordSelected(event) {
-        this._primaryRecord = {
-            id: event.detail.id,
-            name: event.detail.name
-        };
-        console.log('Primary Record Selected: ' + event.detail.id);
-        console.log('Primary Record Name: ' + event.detail.name);
+        if (event.detail?.id) {
+            this._primaryRecord = {
+                id: event.detail.id,
+                name: event.detail.name
+            };
+        } else {
+            this._primaryRecord = undefined;
+        }
     }
 
     handleSecondaryRecordSelected(event) {
-        this._secondaryRecord = {
-            id: event.detail.id,
-            name: event.detail.name
-        };
-        console.log('Secondary Record Selected: ' + event.detail.id);
-        console.log('Secondary Record Name: ' + event.detail.name);
+        if (event.detail?.id) {
+            this._secondaryRecord = {
+                id: event.detail.id,
+                name: event.detail.name
+            };
+        } else {
+            this._secondaryRecord = undefined;
+        }
     }
 }

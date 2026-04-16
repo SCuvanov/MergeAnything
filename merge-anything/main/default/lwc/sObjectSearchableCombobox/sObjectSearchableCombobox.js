@@ -18,9 +18,19 @@ export default class SObjectSearchableCombobox extends LightningElement {
     _debounceTimer;
     _selectedItemLabel;
     _selectedItemApiName;
+    _selectionLocked = false;
+
+    get formElementClass() {
+        return this._selectionLocked ? 'slds-form-element comboboxselected' : 'slds-form-element';
+    }
 
     @wire(getEntityDefinitionsByLabel, { label: '$_searchValueTemp' })
     wireEntityDefinitions({ error, data }) {
+        if (this._selectionLocked) {
+            this._items = [];
+            this._showDropdown = false;
+            return;
+        }
         if (data) {
             this._items = data;
             this._error = undefined;
@@ -36,17 +46,37 @@ export default class SObjectSearchableCombobox extends LightningElement {
 
     handleOnChange(event) {
         if (event.target.dataset.id === SEARCH_INPUT_ID) {
-            this._searchValue = event.target.value;
+            const newVal = event.target.value;
+            if (this._selectionLocked) {
+                const trimmedInput = String(newVal ?? '').trim();
+                const sameAsSelection =
+                    this._selectedItemLabel != null &&
+                    trimmedInput === String(this._selectedItemLabel).trim();
+                if (sameAsSelection) {
+                    window.clearTimeout(this._debounceTimer);
+                    this._debounceTimer = undefined;
+                    return;
+                }
+                if (newVal) {
+                    this._selectionLocked = false;
+                }
+            }
+            this._searchValue = newVal;
         }
 
         window.clearTimeout(this._debounceTimer);
         this._debounceTimer = undefined;
 
         if (!this._searchValue) {
-            window.clearTimeout(this._debounceTimer);
-            this._debounceTimer = undefined;
+            this._selectionLocked = false;
+            this._selectedItemLabel = undefined;
+            this._selectedItemApiName = undefined;
             this._searchValueTemp = '';
             this.setSearchState();
+            this.dispatchItemSelectedEvent(
+                { label: undefined, apiName: undefined },
+                ITEM_SELECTED_EVENT
+            );
             return;
         }
 
@@ -59,6 +89,9 @@ export default class SObjectSearchableCombobox extends LightningElement {
     }
 
     handleOnCommit(event) {
+        if (this._selectionLocked) {
+            return;
+        }
         if (event.target.dataset.id === SEARCH_INPUT_ID) {
             window.clearTimeout(this._debounceTimer);
             this._debounceTimer = undefined;
@@ -67,6 +100,9 @@ export default class SObjectSearchableCombobox extends LightningElement {
     }
 
     flushWireSearch() {
+        if (this._selectionLocked) {
+            return;
+        }
         this._items = [];
         this._showDropdown = false;
         this._searchValueTemp = this._searchValue;
@@ -78,7 +114,9 @@ export default class SObjectSearchableCombobox extends LightningElement {
         this._debounceTimer = undefined;
     }
 
-    handleOnClick(event) {
+    handleOptionMouseDown(event) {
+        event.preventDefault();
+        event.stopPropagation();
         this._selectedItemLabel = event.currentTarget.dataset.label;
         this._selectedItemApiName = event.currentTarget.dataset.api;
 
@@ -86,6 +124,10 @@ export default class SObjectSearchableCombobox extends LightningElement {
     }
 
     setSearchState() {
+        if (this._selectionLocked) {
+            this._showDropdown = false;
+            return;
+        }
         if (!this._searchValue) {
             this._showDropdown = false;
             this._items = [];
@@ -105,8 +147,12 @@ export default class SObjectSearchableCombobox extends LightningElement {
     }
 
     setSelectedItem() {
+        window.clearTimeout(this._debounceTimer);
+        this._debounceTimer = undefined;
+
+        this._selectionLocked = true;
         this._searchValue = this._selectedItemLabel;
-        this._searchValueTemp = this._selectedItemLabel;
+        this._searchValueTemp = '';
         this._items = [];
         this._showDropdown = false;
 

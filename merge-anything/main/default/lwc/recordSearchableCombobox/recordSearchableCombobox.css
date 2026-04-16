@@ -36,3 +36,9 @@ lightning-input {
     transform: none;
     margin-top: var(--slds-g-spacing-xx-small, 0.25rem);
 }
+
+/* Success-tinted input fill when a value is selected (lightning-input styling hooks). */
+.comboboxselected lightning-input {
+    --slds-c-input-color-background: var(--lwc-colorBackgroundSuccessLight, #ecfdf3);
+    --slds-c-input-color-background-focus: var(--lwc-colorBackgroundSuccessLight, #ecfdf3);
+}

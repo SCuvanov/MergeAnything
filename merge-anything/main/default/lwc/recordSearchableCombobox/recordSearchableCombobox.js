@@ -10,7 +10,24 @@ const ITEM_SELECTED_EVENT = 'itemselected';
 
 export default class RecordSearchableCombobox extends LightningElement {
     @api label;
-    @api sobjectApiName;
+
+    _sobjectApiName;
+
+    @api
+    get sobjectApiName() {
+        return this._sobjectApiName;
+    }
+    set sobjectApiName(value) {
+        const next = value ? String(value) : undefined;
+        const prev = this._sobjectApiName;
+        if (next === prev) {
+            return;
+        }
+        if (prev && next !== prev) {
+            this.clearSelectionAfterObjectContextChange();
+        }
+        this._sobjectApiName = next;
+    }
 
     _disabled = false;
 
@@ -36,10 +53,21 @@ export default class RecordSearchableCombobox extends LightningElement {
     _debounceTimer;
     _selectedItemId;
     _selectedItemName;
+    /** When true, wire results are ignored and dropdown stays closed (display name must not re-trigger search). */
+    _selectionLocked = false;
+
+    get formElementClass() {
+        return this._selectionLocked ? 'slds-form-element comboboxselected' : 'slds-form-element';
+    }
 
     @wire(getRecordsWithEditableFields, { sObjectApiName: '$sobjectApiName', name: '$_searchValueTemp' })
     wireRecords({ error, data }) {
         if (this.disabled) {
+            this._showDropdown = false;
+            return;
+        }
+        if (this._selectionLocked) {
+            this._items = [];
             this._showDropdown = false;
             return;
         }
@@ -59,10 +87,13 @@ export default class RecordSearchableCombobox extends LightningElement {
     resetWhenDisabled() {
         window.clearTimeout(this._debounceTimer);
         this._debounceTimer = undefined;
+        this._selectionLocked = false;
         this._searchValue = '';
         this._searchValueTemp = '';
         this._items = [];
         this._showDropdown = false;
+        this._selectedItemId = undefined;
+        this._selectedItemName = undefined;
     }
 
     handleOnChange(event) {
@@ -70,15 +101,34 @@ export default class RecordSearchableCombobox extends LightningElement {
             return;
         }
         if (event.target.dataset.id === SEARCH_INPUT_ID) {
-            this._searchValue = event.target.value;
+            const newVal = event.target.value;
+            if (this._selectionLocked) {
+                const trimmedInput = String(newVal ?? '').trim();
+                const sameAsSelection =
+                    this._selectedItemName != null &&
+                    trimmedInput === String(this._selectedItemName).trim();
+                if (sameAsSelection) {
+                    window.clearTimeout(this._debounceTimer);
+                    this._debounceTimer = undefined;
+                    return;
+                }
+                if (newVal) {
+                    this._selectionLocked = false;
+                }
+            }
+            this._searchValue = newVal;
         }
 
         window.clearTimeout(this._debounceTimer);
         this._debounceTimer = undefined;
 
         if (!this._searchValue) {
+            this._selectionLocked = false;
+            this._selectedItemId = undefined;
+            this._selectedItemName = undefined;
             this._searchValueTemp = '';
             this.setSearchState();
+            this.dispatchItemSelectedEvent({ id: undefined, name: undefined }, ITEM_SELECTED_EVENT);
             return;
         }
 
@@ -91,7 +141,7 @@ export default class RecordSearchableCombobox extends LightningElement {
     }
 
     handleOnCommit(event) {
-        if (this.disabled) {
+        if (this.disabled || this._selectionLocked) {
             return;
         }
         if (event.target.dataset.id === SEARCH_INPUT_ID) {
@@ -102,6 +152,9 @@ export default class RecordSearchableCombobox extends LightningElement {
     }
 
     flushWireSearch() {
+        if (this._selectionLocked) {
+            return;
+        }
         this._items = [];
         this._showDropdown = false;
         this._searchValueTemp = this._searchValue;
@@ -113,10 +166,16 @@ export default class RecordSearchableCombobox extends LightningElement {
         this._debounceTimer = undefined;
     }
 
-    handleOnClick(event) {
+    /**
+     * mousedown (with preventDefault) runs before blur/commit on lightning-input.
+     * Using click alone lets blur fire commit → flushWireSearch → list removed before click lands.
+     */
+    handleOptionMouseDown(event) {
         if (this.disabled) {
             return;
         }
+        event.preventDefault();
+        event.stopPropagation();
         this._selectedItemId = event.currentTarget.dataset.id;
         this._selectedItemName = event.currentTarget.dataset.name;
 
@@ -125,6 +184,10 @@ export default class RecordSearchableCombobox extends LightningElement {
 
     setSearchState() {
         if (this.disabled) {
+            this._showDropdown = false;
+            return;
+        }
+        if (this._selectionLocked) {
             this._showDropdown = false;
             return;
         }
@@ -147,8 +210,12 @@ export default class RecordSearchableCombobox extends LightningElement {
     }
 
     setSelectedItem() {
+        window.clearTimeout(this._debounceTimer);
+        this._debounceTimer = undefined;
+
+        this._selectionLocked = true;
         this._searchValue = this._selectedItemName;
-        this._searchValueTemp = this._selectedItemName;
+        this._searchValueTemp = '';
         this._items = [];
         this._showDropdown = false;
 
@@ -158,6 +225,18 @@ export default class RecordSearchableCombobox extends LightningElement {
         };
 
         this.dispatchItemSelectedEvent(selectedItem, ITEM_SELECTED_EVENT);
+    }
+
+    clearSelectionAfterObjectContextChange() {
+        this._selectionLocked = false;
+        this._selectedItemId = undefined;
+        this._selectedItemName = undefined;
+        this._searchValue = '';
+        this._searchValueTemp = '';
+        this._items = [];
+        this._showDropdown = false;
+        window.clearTimeout(this._debounceTimer);
+        this._debounceTimer = undefined;
     }
 
     dispatchItemSelectedEvent(selectedItem, eventName) {

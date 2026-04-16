@@ -35,3 +35,8 @@ lightning-input {
     transform: none;
     margin-top: var(--slds-g-spacing-xx-small, 0.25rem);
 }
+
+.comboboxselected lightning-input {
+    --slds-c-input-color-background: var(--lwc-colorBackgroundSuccessLight, #ecfdf3);
+    --slds-c-input-color-background-focus: var(--lwc-colorBackgroundSuccessLight, #ecfdf3);
+}
