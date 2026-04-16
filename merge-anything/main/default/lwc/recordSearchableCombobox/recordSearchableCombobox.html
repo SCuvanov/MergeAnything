@@ -5,11 +5,12 @@
                 <div class="slds-combobox slds-dropdown-trigger slds-dropdown-trigger_click slds-is-open">
                     <div class="slds-combobox__form-element slds-input-has-icon slds-input-has-icon_right" role="none">
                         <lightning-input data-id="searchInput" name="enter-search" label={label} type="search"
-                            placeholder="Press 'Enter' to Search" value={_searchValue} onchange={handleOnChange}
-                            oncommit={handleOnCommit}></lightning-input>
+                            disabled={disabled} placeholder="Type to search, or press Enter" value={_searchValue}
+                            onchange={handleOnChange} oncommit={handleOnCommit}></lightning-input>
                     </div>
                     <template lwc:if={_showDropdown}>
-                        <div id="listbox-id-15" class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid"
+                        <div id="listbox-id-15"
+                            class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid dropdown-in-flow"
                             role="listbox">
                             <ul class="slds-listbox slds-listbox_vertical" role="presentation">
                                 <template for:each={_items} for:item="item">

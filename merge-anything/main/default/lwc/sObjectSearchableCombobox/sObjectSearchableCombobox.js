@@ -3,6 +3,7 @@ import getEntityDefinitionsByLabel from '@salesforce/apex/BulkMergeController.ge
 
 //UI
 const SEARCH_INPUT_ID = 'searchInput';
+const DEBOUNCE_MS = 350;
 
 //EVENTS
 const ITEM_SELECTED_EVENT = 'itemselected';
@@ -14,6 +15,7 @@ export default class SObjectSearchableCombobox extends LightningElement {
     _searchValueTemp;
     _items;
     _showDropdown = false;
+    _debounceTimer;
     _selectedItemLabel;
     _selectedItemApiName;
 
@@ -36,13 +38,44 @@ export default class SObjectSearchableCombobox extends LightningElement {
         if (event.target.dataset.id === SEARCH_INPUT_ID) {
             this._searchValue = event.target.value;
         }
+
+        window.clearTimeout(this._debounceTimer);
+        this._debounceTimer = undefined;
+
+        if (!this._searchValue) {
+            window.clearTimeout(this._debounceTimer);
+            this._debounceTimer = undefined;
+            this._searchValueTemp = '';
+            this.setSearchState();
+            return;
+        }
+
+        this._debounceTimer = window.setTimeout(() => {
+            this._debounceTimer = undefined;
+            this.flushWireSearch();
+        }, DEBOUNCE_MS);
+
         this.setSearchState();
     }
 
     handleOnCommit(event) {
         if (event.target.dataset.id === SEARCH_INPUT_ID) {
-            this._searchValueTemp = this._searchValue;
+            window.clearTimeout(this._debounceTimer);
+            this._debounceTimer = undefined;
+            this.flushWireSearch();
         }
+    }
+
+    flushWireSearch() {
+        this._items = [];
+        this._showDropdown = false;
+        this._searchValueTemp = this._searchValue;
+        this.setSearchState();
+    }
+
+    disconnectedCallback() {
+        window.clearTimeout(this._debounceTimer);
+        this._debounceTimer = undefined;
     }
 
     handleOnClick(event) {
@@ -59,6 +92,11 @@ export default class SObjectSearchableCombobox extends LightningElement {
             return;
         }
 
+        if (this._searchValue !== this._searchValueTemp) {
+            this._showDropdown = false;
+            return;
+        }
+
         if (this._items && this._items.length > 0) {
             this._showDropdown = true;
         } else {
@@ -68,6 +106,7 @@ export default class SObjectSearchableCombobox extends LightningElement {
 
     setSelectedItem() {
         this._searchValue = this._selectedItemLabel;
+        this._searchValueTemp = this._selectedItemLabel;
         this._items = [];
         this._showDropdown = false;
 

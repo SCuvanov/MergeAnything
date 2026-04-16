@@ -9,6 +9,10 @@ export default class NewMergeItemModal extends LightningModal {
     _primaryRecord;
     _secondaryRecord;
 
+    get recordsComboboxDisabled() {
+        return !this._sobjectApiName;
+    }
+
     handleCancel() {
         this.close();
     }

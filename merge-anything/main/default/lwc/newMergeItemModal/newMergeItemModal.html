@@ -1,7 +1,7 @@
 <template>
     <lightning-modal-header label="New Merge Item"></lightning-modal-header>
     <lightning-modal-body>
-        <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center">
+        <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center slds-m-bottom_small">
             <div>
                 <lightning-formatted-text class="slds-text-heading_small"
                     value="You are about to create a new Merge Item. Are you sure you want to do this?"></lightning-formatted-text>
@@ -13,39 +13,33 @@
                     value="A Merge Item represents the details of two records to be merged."></lightning-formatted-text>
             </div>
         </div>
-        <div class="slds-border_bottom slds-m-top_small slds-m-bottom_medium"></div>
-        <div class="slds-grid slds-grid_align-space">
-            <div class="slds-grid slds-grid_vertical">
-                <div class="slds-grid slds-grid_align-center slds-m-bottom_x-small">
-                    <lightning-formatted-text class="slds-text-heading_small"
-                        value="Primary Record Details"></lightning-formatted-text>
-                </div>
 
-                <c-s-object-searchable-combobox class="slds-m-bottom_x-small" label="Object Name"
-                    onitemselected={handleSObjectSelected}></c-s-object-searchable-combobox>
+        <div class="slds-m-bottom_small">
+            <c-s-object-searchable-combobox label="Object" onitemselected={handleSObjectSelected}>
+            </c-s-object-searchable-combobox>
+        </div>
 
-                <c-record-searchable-combobox class="slds-m-bottom_x-small" label="Primary Record"
-                    sobject-api-name={_sobjectApiName}
-                    onitemselected={handlePrimaryRecordSelected}></c-record-searchable-combobox>
+        <div class="slds-box slds-theme_default slds-m-top_medium slds-p-around_medium">
+            <div class="slds-text-heading_small slds-m-bottom_small">Records</div>
 
+            <c-record-searchable-combobox class="slds-m-bottom_small" label="Primary record"
+                disabled={recordsComboboxDisabled} sobject-api-name={_sobjectApiName}
+                onitemselected={handlePrimaryRecordSelected}>
+            </c-record-searchable-combobox>
+
+            <div class="slds-text-align_center slds-m-vertical_small" role="presentation">
+                <lightning-icon icon-name="utility:merge" size="x-small" alternative-text="Then">
+                </lightning-icon>
             </div>
-            <div class="slds-grid slds-grid_vertical">
-                <div class="slds-grid slds-grid_align-center slds-m-bottom_x-small">
-                    <lightning-formatted-text class="slds-text-heading_small"
-                        value="Secondary Record Details"></lightning-formatted-text>
-                </div>
 
-                <c-s-object-searchable-combobox class="slds-m-bottom_x-small" label="Object Name"
-                    style="visibility: hidden;"></c-s-object-searchable-combobox>
-
-                <c-record-searchable-combobox class="slds-m-bottom_x-small" label="Secondary Record"
-                    onitemselected={handleSecondaryRecordSelected}></c-record-searchable-combobox>
-            </div>
+            <c-record-searchable-combobox label="Secondary record" disabled={recordsComboboxDisabled}
+                sobject-api-name={_sobjectApiName} onitemselected={handleSecondaryRecordSelected}>
+            </c-record-searchable-combobox>
         </div>
     </lightning-modal-body>
     <lightning-modal-footer>
         <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
-        <lightning-button class="slds-m-left_xx-small" label="Save" variant="brand"
+        <lightning-button class="slds-m-left_xx-small" label="Create merge item" variant="brand"
             onclick={handleSave}></lightning-button>
     </lightning-modal-footer>
 </template>

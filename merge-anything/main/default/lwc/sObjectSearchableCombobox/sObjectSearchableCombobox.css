@@ -1,0 +1,37 @@
+:host {
+    display: block;
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+    overflow: visible;
+}
+
+.slds-form-element,
+.slds-form-element__control,
+.slds-combobox_container,
+.slds-combobox,
+.slds-combobox__form-element {
+    width: 100%;
+    max-width: 100%;
+    box-sizing: border-box;
+}
+
+lightning-input {
+    display: block;
+    width: 100%;
+}
+
+.slds-combobox_container,
+.slds-combobox {
+    overflow: visible;
+}
+
+.dropdown-in-flow {
+    position: relative;
+    top: auto;
+    right: auto;
+    bottom: auto;
+    left: auto;
+    transform: none;
+    margin-top: var(--slds-g-spacing-xx-small, 0.25rem);
+}
