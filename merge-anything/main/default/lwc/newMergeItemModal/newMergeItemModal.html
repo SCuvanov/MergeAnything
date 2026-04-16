@@ -36,6 +36,23 @@
                 sobject-api-name={_sobjectApiName} onitemselected={handleSecondaryRecordSelected}>
             </c-record-searchable-combobox>
         </div>
+
+        <template lwc:if={showFieldMergeSection}>
+            <div class="slds-box slds-theme_default slds-m-top_medium slds-p-around_medium">
+                <div class="slds-text-heading_small slds-m-bottom_xx-small">Field merge</div>
+                <lightning-formatted-text class="slds-text-body_small slds-m-bottom_x-small"
+                    value={fieldMergeRecordSummary}>
+                </lightning-formatted-text>
+                <lightning-formatted-text class="slds-text-body_small slds-text-color_weak"
+                    value="For each field below, choose whether the primary or secondary record supplies the value that will be kept on the primary record after the merge.">
+                </lightning-formatted-text>
+                <div class="slds-m-top_medium slds-p-around_medium slds-text-align_center slds-text-color_weak slds-border_top">
+                    <lightning-formatted-text
+                        value="Field comparison and selection controls will appear here.">
+                    </lightning-formatted-text>
+                </div>
+            </div>
+        </template>
     </lightning-modal-body>
     <lightning-modal-footer>
         <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>

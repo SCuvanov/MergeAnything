@@ -13,6 +13,21 @@ export default class NewMergeItemModal extends LightningModal {
         return !this._sobjectApiName;
     }
 
+    get showFieldMergeSection() {
+        const primaryId = this._primaryRecord?.id;
+        const secondaryId = this._secondaryRecord?.id;
+        return Boolean(primaryId && secondaryId && primaryId !== secondaryId);
+    }
+
+    get fieldMergeRecordSummary() {
+        const pName = this._primaryRecord?.name;
+        const sName = this._secondaryRecord?.name;
+        if (!pName || !sName) {
+            return '';
+        }
+        return `Primary: ${pName} — Secondary: ${sName}`;
+    }
+
     handleCancel() {
         this.close();
     }
