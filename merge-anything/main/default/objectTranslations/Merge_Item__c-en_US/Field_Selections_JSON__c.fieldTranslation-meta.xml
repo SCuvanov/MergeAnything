@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help><!-- JSON array of field-level primary vs secondary choices for this merge item. --></help>
     <label>Field Selections (JSON)</label>
     <name>Field_Selections_JSON__c</name>
 </CustomFieldTranslation>

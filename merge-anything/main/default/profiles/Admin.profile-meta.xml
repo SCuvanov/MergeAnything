@@ -39,13 +39,13 @@
     </classAccesses>
     <custom>false</custom>
     <fieldPermissions>
-        <editable>false</editable>
-        <field>Merge_Item__c.Link__c</field>
+        <editable>true</editable>
+        <field>Merge_Item__c.Field_Selections_JSON__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
-        <editable>true</editable>
-        <field>Merge_Item__c.Field_Selections_JSON__c</field>
+        <editable>false</editable>
+        <field>Merge_Item__c.Link__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

@@ -2,7 +2,6 @@
 <CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
     <fullName>Field_Selections_JSON__c</fullName>
     <description>Serialized merge field choices (field API name and usePrimary) used to rebuild merged JSON on execution.</description>
-    <externalId>false</externalId>
     <inlineHelpText>JSON array of field-level primary vs secondary choices for this merge item.</inlineHelpText>
     <label>Field Selections JSON</label>
     <length>131072</length>
