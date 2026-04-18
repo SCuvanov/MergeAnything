@@ -19,10 +19,14 @@
           </div>
         </div>
         <div class="slds-m-top_large">
+          <template lwc:if={_executing}>
+            <lightning-spinner alternative-text="Running merge job" size="small"
+              class="slds-m-bottom_x-small"></lightning-spinner>
+          </template>
           <lightning-button variant="neutral" label="Refresh" title="Refresh" icon-name="utility:refresh"
-            onclick={handleRefresh}></lightning-button>
+            onclick={handleRefresh} disabled={actionsDisabled}></lightning-button>
           <lightning-button variant="brand" label="Start" title="Start" icon-name="utility:play"
-            class="slds-m-left_xx-small" onclick={handleStart}></lightning-button>
+            class="slds-m-left_xx-small" onclick={handleStart} disabled={actionsDisabled}></lightning-button>
         </div>
         <div class="slds-m-top_medium">
           <p>PIE CHART PLACEHOLDER</p>

@@ -22,17 +22,15 @@
           </lightning-combobox>
         </div>
 
-        <template lwc:if={_showMergeJobList}>
-          <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
-            <c-merge-job-list record-id={recordId} merge-view={_mergeView}
-              onmergejobselected={handleMergeJobSelected}></c-merge-job-list>
-          </div>
-        </template>
-        <template lwc:else>
-          <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
-            <c-merge-item-list record-id={recordId} merge-view={_mergeView}></c-merge-item-list>
-          </div>
-        </template>
+        <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end"
+          hidden={mergeJobListHidden}>
+          <c-merge-job-list record-id={recordId} merge-view={_mergeView}
+            onmergejobselected={handleMergeJobSelected}></c-merge-job-list>
+        </div>
+        <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end"
+          hidden={mergeItemListHidden}>
+          <c-merge-item-list record-id={recordId} merge-view={_mergeView}></c-merge-item-list>
+        </div>
       </template>
     </div>
   </lightning-card>

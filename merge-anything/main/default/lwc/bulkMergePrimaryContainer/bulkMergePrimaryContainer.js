@@ -70,6 +70,14 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         ];
     }
 
+    get mergeJobListHidden() {
+        return !this._showMergeJobList;
+    }
+
+    get mergeItemListHidden() {
+        return this._showMergeJobList;
+    }
+
     get _mergeViews() {
         let mergeViews = [];
         if (this._mergeOption === MERGE_JOBS) {
@@ -126,7 +134,8 @@ export default class BulkMergePrimaryContainer extends LightningElement {
 
     async handleNewMergeItem() {
         const result = await NewMergeItemModal.open({
-            size: 'small'
+            size: 'small',
+            mergeJobId: this.recordId
         });
 
         if (!result) {
@@ -134,7 +143,6 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         }
 
         if (result.status === SUCCESS && result.mergeItem) {
-            //this.dispatchMergeJobEvent(result.mergeJob.Id, MERGE_JOB_CREATED_EVENT);
             this.showToastEvent(
                 null,
                 'Merge Item "{0}" was created.',
@@ -146,6 +154,10 @@ export default class BulkMergePrimaryContainer extends LightningElement {
                 ],
                 'success'
             );
+            const mergeItemList = this.template.querySelector('c-merge-item-list');
+            if (mergeItemList) {
+                mergeItemList.refreshList();
+            }
         }
 
         //TODO: HANDLE ERROR

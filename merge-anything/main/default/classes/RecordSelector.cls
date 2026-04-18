@@ -30,6 +30,46 @@ public with sharing class RecordSelector {
     }
 
     /**
+     * @description One mergeable field with primary vs secondary display values for the merge UI.
+     */
+    public class MergeFieldRow {
+        @AuraEnabled
+        public String apiName { get; set; }
+        @AuraEnabled
+        public String label { get; set; }
+        @AuraEnabled
+        public String primaryValue { get; set; }
+        @AuraEnabled
+        public String secondaryValue { get; set; }
+    }
+
+    /**
+     * @description Field-level choice when persisting a merge (use primary vs secondary value).
+     */
+    public class MergeFieldSelection {
+        @AuraEnabled
+        public String fieldApiName { get; set; }
+        @AuraEnabled
+        public Boolean usePrimary { get; set; }
+    }
+
+    /**
+     * @description JSON snapshots for primary, secondary, and merged field maps.
+     */
+    public class MergeJsonBlob {
+        public String primaryJson { get; set; }
+        public String secondaryJson { get; set; }
+        public String mergedJson { get; set; }
+    }
+
+    private class MergePairContext {
+        SObject primaryRow;
+        SObject secondaryRow;
+        List<String> fieldApiNames;
+        Schema.SObjectType sObjectType;
+    }
+
+    /**
      * @description Queries up to {@link #DEFAULT_ROW_LIMIT} rows for the given object, selecting Id and all
      *              accessible, updateable (non-compound) fields as determined at runtime from describe metadata.
      * @param sObjectApiName Qualified API name of the sObject (e.g. Account, Custom_Object__c)
@@ -132,6 +172,199 @@ public with sharing class RecordSelector {
         return options;
     }
 
+    /**
+     * @description Loads two records by Id with the same editable field projection used for search, and returns
+     *              side-by-side values for merge (excluding `Id`).
+     */
+    public List<MergeFieldRow> getMergeFieldRows(String sObjectApiName, Id primaryId, Id secondaryId) {
+        List<MergeFieldRow> rows = new List<MergeFieldRow>();
+
+        MergePairContext ctx = loadMergePair(sObjectApiName, primaryId, secondaryId);
+        if (ctx == null) {
+            return rows;
+        }
+
+        Map<String, Schema.SObjectField> fieldMap = ctx.sObjectType.getDescribe().fields.getMap();
+
+        for (String fieldName : ctx.fieldApiNames) {
+            if (fieldName == 'Id') {
+                continue;
+            }
+
+            Schema.SObjectField fieldToken = fieldMap.get(fieldName);
+            if (fieldToken == null) {
+                continue;
+            }
+
+            Schema.DescribeFieldResult dfr = fieldToken.getDescribe();
+            String primaryValue = formatFieldValueForDisplay(ctx.primaryRow.get(fieldName), dfr);
+            String secondaryValue = formatFieldValueForDisplay(ctx.secondaryRow.get(fieldName), dfr);
+            if (String.isBlank(primaryValue) && String.isBlank(secondaryValue)) {
+                continue;
+            }
+
+            MergeFieldRow mergeRow = new MergeFieldRow();
+            mergeRow.apiName = fieldName;
+            mergeRow.label = dfr.getLabel();
+            mergeRow.primaryValue = primaryValue;
+            mergeRow.secondaryValue = secondaryValue;
+            rows.add(mergeRow);
+        }
+
+        return rows;
+    }
+
+    /**
+     * @description Builds JSON strings of field API name to typed values for primary, secondary, and merged (primary
+     *              with secondary overlays per {@code fieldSelections}).
+     */
+    public MergeJsonBlob buildMergeItemJson(
+        String sObjectApiName,
+        Id primaryId,
+        Id secondaryId,
+        List<MergeFieldSelection> fieldSelections
+    ) {
+        MergePairContext ctx = loadMergePair(sObjectApiName, primaryId, secondaryId);
+        if (ctx == null) {
+            return null;
+        }
+
+        Map<String, Object> primaryMap = toFieldValueMap(ctx.primaryRow, ctx.fieldApiNames);
+        Map<String, Object> secondaryMap = toFieldValueMap(ctx.secondaryRow, ctx.fieldApiNames);
+
+        Map<String, Object> merged = new Map<String, Object>(primaryMap);
+        applyMergeFieldSelections(ctx, merged, fieldSelections);
+
+        MergeJsonBlob jsonPayload = new MergeJsonBlob();
+        jsonPayload.primaryJson = JSON.serialize(primaryMap);
+        jsonPayload.secondaryJson = JSON.serialize(secondaryMap);
+        jsonPayload.mergedJson = JSON.serialize(merged);
+        return jsonPayload;
+    }
+
+    /**
+     * @description Serializes the merged field map only: current primary values with secondary substitutions from
+     *              {@code fieldSelections}. Used when executing a merge job without refreshing primary/secondary JSON.
+     */
+    public String buildMergedRecordJson(
+        String sObjectApiName,
+        Id primaryId,
+        Id secondaryId,
+        List<MergeFieldSelection> fieldSelections
+    ) {
+        MergePairContext ctx = loadMergePair(sObjectApiName, primaryId, secondaryId);
+        if (ctx == null) {
+            return null;
+        }
+
+        Map<String, Object> merged = new Map<String, Object>(toFieldValueMap(ctx.primaryRow, ctx.fieldApiNames));
+        applyMergeFieldSelections(ctx, merged, fieldSelections);
+        return JSON.serialize(merged);
+    }
+
+    private void applyMergeFieldSelections(
+        MergePairContext ctx,
+        Map<String, Object> merged,
+        List<MergeFieldSelection> fieldSelections
+    ) {
+        if (fieldSelections == null) {
+            return;
+        }
+        for (MergeFieldSelection sel : fieldSelections) {
+            if (sel == null || String.isBlank(sel.fieldApiName)) {
+                continue;
+            }
+            if (sel.usePrimary != null && sel.usePrimary == false) {
+                merged.put(sel.fieldApiName, ctx.secondaryRow.get(sel.fieldApiName));
+            }
+        }
+    }
+
+    private MergePairContext loadMergePair(String sObjectApiName, Id primaryId, Id secondaryId) {
+        if (String.isBlank(sObjectApiName) || primaryId == null || secondaryId == null) {
+            return null;
+        }
+        if (primaryId == secondaryId) {
+            return null;
+        }
+
+        Schema.SObjectType sObjectType = resolveSObjectType(sObjectApiName);
+        if (sObjectType == null) {
+            return null;
+        }
+
+        String searchFieldApiName = resolveSearchFieldApiName(sObjectType);
+        Set<String> requiredFields = new Set<String>{ 'Id' };
+        if (!String.isBlank(searchFieldApiName)) {
+            requiredFields.add(searchFieldApiName);
+        }
+
+        List<String> fieldApiNames = buildEditableFieldSelectList(sObjectType, requiredFields);
+        if (fieldApiNames.isEmpty()) {
+            return null;
+        }
+
+        String objectApiName = sObjectType.getDescribe().getName();
+        Set<Id> idSet = new Set<Id>{ primaryId, secondaryId };
+        String soql =
+            'SELECT ' +
+            String.join(fieldApiNames, ', ') +
+            ' FROM ' +
+            objectApiName +
+            ' WHERE Id IN :idSet WITH SECURITY_ENFORCED';
+
+        List<SObject> queried = Database.query(soql);
+
+        if (queried.size() != 2) {
+            return null;
+        }
+
+        SObject primaryRow;
+        SObject secondaryRow;
+        for (SObject row : queried) {
+            if (row.Id == primaryId) {
+                primaryRow = row;
+            } else if (row.Id == secondaryId) {
+                secondaryRow = row;
+            }
+        }
+
+        if (primaryRow == null || secondaryRow == null) {
+            return null;
+        }
+
+        MergePairContext ctx = new MergePairContext();
+        ctx.primaryRow = primaryRow;
+        ctx.secondaryRow = secondaryRow;
+        ctx.fieldApiNames = fieldApiNames;
+        ctx.sObjectType = sObjectType;
+        return ctx;
+    }
+
+    private static Map<String, Object> toFieldValueMap(SObject row, List<String> fieldApiNames) {
+        Map<String, Object> m = new Map<String, Object>();
+        for (String fieldName : fieldApiNames) {
+            m.put(fieldName, row.get(fieldName));
+        }
+        return m;
+    }
+
+    private static String formatFieldValueForDisplay(Object raw, Schema.DescribeFieldResult dfr) {
+        if (raw == null) {
+            return '';
+        }
+
+        Schema.DisplayType displayType = dfr.getType();
+
+        if (displayType == Schema.DisplayType.DATE) {
+            return ((Date) raw).format();
+        }
+        if (displayType == Schema.DisplayType.DATETIME) {
+            return ((Datetime) raw).format();
+        }
+        return String.valueOf(raw);
+    }
+
     private static Schema.SObjectType resolveSObjectType(String sObjectApiName) {
         Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
         if (globalDescribe.containsKey(sObjectApiName)) {
@@ -215,5 +448,240 @@ public with sharing class RecordSelector {
             return DEFAULT_ROW_LIMIT;
         }
         return Math.min(rowLimit, MAX_ROW_LIMIT);
+    }
+
+    /**
+     * @description Deserializes {@code Field_Selections_JSON__c} (JSON array of {@code MergeFieldSelection}). Returns
+     *              empty list if blank or invalid JSON.
+     */
+    public List<MergeFieldSelection> parseFieldSelectionsFromJson(String selectionsJson) {
+        List<MergeFieldSelection> result = new List<MergeFieldSelection>();
+        if (String.isBlank(selectionsJson)) {
+            return result;
+        }
+        try {
+            List<Object> raw = (List<Object>) JSON.deserializeUntyped(selectionsJson);
+            if (raw == null) {
+                return result;
+            }
+            for (Object o : raw) {
+                if (o == null) {
+                    continue;
+                }
+                Map<String, Object> m = (Map<String, Object>) o;
+                MergeFieldSelection sel = new MergeFieldSelection();
+                sel.fieldApiName = (String) m.get('fieldApiName');
+                Object up = m.get('usePrimary');
+                if (up instanceof Boolean) {
+                    sel.usePrimary = (Boolean) up;
+                } else {
+                    sel.usePrimary = true;
+                }
+                result.add(sel);
+            }
+        } catch (Exception e) {
+            return new List<MergeFieldSelection>();
+        }
+        return result;
+    }
+
+    /**
+     * @description Legacy fallback: reconstructs which fields used secondary values by comparing stored primary,
+     *              secondary, and merged JSON snapshots when {@code Field_Selections_JSON__c} is absent.
+     */
+    public List<MergeFieldSelection> inferFieldSelectionsFromStoredJson(
+        String primaryJson,
+        String secondaryJson,
+        String mergedJson
+    ) {
+        List<MergeFieldSelection> selections = new List<MergeFieldSelection>();
+
+        if (String.isBlank(primaryJson) || String.isBlank(secondaryJson) || String.isBlank(mergedJson)) {
+            return selections;
+        }
+
+        Map<String, Object> primaryMap = (Map<String, Object>) JSON.deserializeUntyped(primaryJson);
+        Map<String, Object> secondaryMap = (Map<String, Object>) JSON.deserializeUntyped(secondaryJson);
+        Map<String, Object> mergedMap = (Map<String, Object>) JSON.deserializeUntyped(mergedJson);
+
+        for (String fieldName : mergedMap.keySet()) {
+            if (fieldName == null || fieldName.equalsIgnoreCase('Id')) {
+                continue;
+            }
+
+            Object mVal = mergedMap.get(fieldName);
+            Object pVal = primaryMap.get(fieldName);
+            Object sVal = secondaryMap.get(fieldName);
+
+            if (jsonSnapshotValuesEqual(mVal, pVal)) {
+                continue;
+            }
+            if (jsonSnapshotValuesEqual(mVal, sVal)) {
+                MergeFieldSelection sel = new MergeFieldSelection();
+                sel.fieldApiName = fieldName;
+                sel.usePrimary = false;
+                selections.add(sel);
+            }
+        }
+
+        return selections;
+    }
+
+    /**
+     * @description Applies merged field values to the surviving (primary) record Id.
+     */
+    public void updateSurvivorFromMergedJson(String sObjectApiName, Id survivorId, String mergedJson) {
+        if (String.isBlank(mergedJson) || survivorId == null) {
+            throw new AuraHandledException('Cannot apply merge: missing merged data.');
+        }
+
+        Schema.SObjectType sObjectType = resolveSObjectType(sObjectApiName);
+        if (sObjectType == null) {
+            throw new AuraHandledException('Unknown object type.');
+        }
+
+        Map<String, Object> valueMap = (Map<String, Object>) JSON.deserializeUntyped(mergedJson);
+        Map<String, Schema.SObjectField> fieldMap = sObjectType.getDescribe().fields.getMap();
+        SObject row = sObjectType.newSObject(survivorId);
+
+        for (String fieldName : valueMap.keySet()) {
+            if (fieldName == null || fieldName.equalsIgnoreCase('Id')) {
+                continue;
+            }
+
+            Schema.SObjectField fieldToken = fieldMap.get(fieldName);
+            if (fieldToken == null) {
+                continue;
+            }
+
+            Schema.DescribeFieldResult dfr = fieldToken.getDescribe();
+            if (!dfr.isUpdateable() || dfr.isCalculated()) {
+                continue;
+            }
+
+            Object coerced = coerceMergeValueForUpdate(valueMap.get(fieldName), dfr);
+            row.put(fieldName, coerced);
+        }
+
+        List<SObject> rows = new List<SObject>{ row };
+        SObjectAccessDecision decision = Security.stripInaccessible(AccessType.UPDATABLE, rows);
+        List<SObject> safeRows = decision.getRecords();
+        if (safeRows.isEmpty()) {
+            throw new AuraHandledException('Could not update record after field security checks.');
+        }
+        update safeRows[0];
+    }
+
+    private static Time parseTimeFromSerializedValue(String s) {
+        if (String.isBlank(s)) {
+            return null;
+        }
+        String normalized = s.trim();
+        List<String> withMs = normalized.split('\\.');
+        List<String> hmsParts = withMs[0].split(':');
+        if (hmsParts.size() < 3) {
+            throw new AuraHandledException('Unrecognized time value: ' + s);
+        }
+        Integer hh = Integer.valueOf(hmsParts[0].trim());
+        Integer mm = Integer.valueOf(hmsParts[1].trim());
+        String secDigits = hmsParts[2].replaceAll('[^0-9]', '');
+        Integer ss = secDigits.length() >= 2
+            ? Integer.valueOf(secDigits.substring(0, 2))
+            : Integer.valueOf(secDigits);
+        Integer ms = 0;
+        if (withMs.size() > 1) {
+            String frac = withMs[1].replaceAll('[^0-9]', '');
+            if (frac.length() > 3) {
+                frac = frac.substring(0, 3);
+            }
+            while (frac.length() < 3) {
+                frac = frac + '0';
+            }
+            ms = Integer.valueOf(frac);
+        }
+        return Time.newInstance(hh, mm, ss, ms);
+    }
+
+    private static Boolean jsonSnapshotValuesEqual(Object a, Object b) {
+        if (a == null && b == null) {
+            return true;
+        }
+        if (a == null || b == null) {
+            return false;
+        }
+        return JSON.serialize(a) == JSON.serialize(b);
+    }
+
+    private static Object coerceMergeValueForUpdate(Object raw, Schema.DescribeFieldResult dfr) {
+        if (raw == null) {
+            return null;
+        }
+
+        Schema.DisplayType displayType = dfr.getType();
+
+        if (displayType == Schema.DisplayType.BOOLEAN) {
+            if (raw instanceof Boolean) {
+                return raw;
+            }
+            return Boolean.valueOf(String.valueOf(raw));
+        }
+
+        if (
+            displayType == Schema.DisplayType.CURRENCY ||
+            displayType == Schema.DisplayType.DOUBLE ||
+            displayType == Schema.DisplayType.PERCENT ||
+            displayType == Schema.DisplayType.INTEGER
+        ) {
+            return raw instanceof Decimal
+                ? (Decimal) raw
+                : Decimal.valueOf(String.valueOf(raw));
+        }
+
+        if (displayType == Schema.DisplayType.DATE) {
+            if (raw instanceof Date) {
+                return raw;
+            }
+            return Date.valueOf(String.valueOf(raw));
+        }
+
+        if (displayType == Schema.DisplayType.DATETIME) {
+            if (raw instanceof Datetime) {
+                return raw;
+            }
+            String s = String.valueOf(raw).replace('T', ' ');
+            if (s.length() > 19) {
+                Integer dot = s.indexOf('.');
+                if (dot > 0) {
+                    s = s.substring(0, dot);
+                } else {
+                    s = s.substring(0, 19);
+                }
+            }
+            return Datetime.valueOf(s);
+        }
+
+        if (displayType == Schema.DisplayType.TIME) {
+            if (raw instanceof Time) {
+                return raw;
+            }
+            return parseTimeFromSerializedValue(String.valueOf(raw));
+        }
+
+        if (displayType == Schema.DisplayType.ID || displayType == Schema.DisplayType.REFERENCE) {
+            if (raw instanceof Id) {
+                return raw;
+            }
+            String s = String.valueOf(raw);
+            return String.isBlank(s) ? null : Id.valueOf(s);
+        }
+
+        if (displayType == Schema.DisplayType.BASE64) {
+            if (raw instanceof Blob) {
+                return raw;
+            }
+            return EncodingUtil.base64Decode(String.valueOf(raw));
+        }
+
+        return raw instanceof String ? (String) raw : String.valueOf(raw);
     }
 }

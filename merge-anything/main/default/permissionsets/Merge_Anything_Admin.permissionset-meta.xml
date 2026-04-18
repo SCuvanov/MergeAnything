@@ -6,7 +6,12 @@
     </applicationVisibilities>
     <description>Administrative access to the Merge Anything App.</description>
     <fieldPermissions>
-        <editable>false</editable>
+        <editable>true</editable>
+        <field>Merge_Item__c.Field_Selections_JSON__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Merge_Item__c.Link__c</field>
         <readable>true</readable>
     </fieldPermissions>

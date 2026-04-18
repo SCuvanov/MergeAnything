@@ -39,6 +39,10 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Readonly</behavior>
+                <field>Field_Selections_JSON__c</field>
+            </layoutItems>
+            <layoutItems>
+                <behavior>Readonly</behavior>
                 <field>Merged_Record_JSON__c</field>
             </layoutItems>
         </layoutColumns>

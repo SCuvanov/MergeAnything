@@ -45,6 +45,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Merge_Item__c.Field_Selections_JSON__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Merge_Item__c.Merged_Record_JSON__c</field>
         <readable>true</readable>
     </fieldPermissions>

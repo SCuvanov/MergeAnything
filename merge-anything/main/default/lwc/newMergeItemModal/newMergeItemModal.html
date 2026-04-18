@@ -1,6 +1,7 @@
 <template>
     <lightning-modal-header label="New Merge Item"></lightning-modal-header>
     <lightning-modal-body>
+        <template lwc:if={showNewMergeItemSection}>
         <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center slds-m-bottom_small">
             <div>
                 <lightning-formatted-text class="slds-text-heading_small"
@@ -35,28 +36,96 @@
             <c-record-searchable-combobox label="Secondary record" disabled={recordsComboboxDisabled}
                 sobject-api-name={_sobjectApiName} onitemselected={handleSecondaryRecordSelected}>
             </c-record-searchable-combobox>
+
+            <template lwc:if={loadingMergeFields}>
+                <div class="slds-align_absolute-center slds-p-around_medium">
+                    <lightning-spinner alternative-text="Loading fields" size="medium"></lightning-spinner>
+                </div>
+            </template>
         </div>
+        </template>
+
+        <!-- Field Merge Section -->
 
         <template lwc:if={showFieldMergeSection}>
-            <div class="slds-box slds-theme_default slds-m-top_medium slds-p-around_medium">
-                <div class="slds-text-heading_small slds-m-bottom_xx-small">Field merge</div>
-                <lightning-formatted-text class="slds-text-body_small slds-m-bottom_x-small"
-                    value={fieldMergeRecordSummary}>
-                </lightning-formatted-text>
-                <lightning-formatted-text class="slds-text-body_small slds-text-color_weak"
-                    value="For each field below, choose whether the primary or secondary record supplies the value that will be kept on the primary record after the merge.">
-                </lightning-formatted-text>
-                <div class="slds-m-top_medium slds-p-around_medium slds-text-align_center slds-text-color_weak slds-border_top">
-                    <lightning-formatted-text
-                        value="Field comparison and selection controls will appear here.">
-                    </lightning-formatted-text>
+
+            <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center slds-m-bottom_small">
+                <div>
+                    <lightning-formatted-text class="slds-text-heading_small"
+                        value="Select Fields to Merge"></lightning-formatted-text>
                 </div>
+                <div class="slds-grid slds-grid_vertical-align-center slds-grid_align-center slds-m-top_small">
+                </div>
+            </div>
+    
+            <div class="slds-box slds-theme_default slds-p-around_medium">
+                <div class="slds-grid slds-gutters slds-m-bottom_small slds-border_bottom slds-p-bottom_small">
+                    <div class="slds-col slds-size_1-of-2 slds-text-align_center">
+                        <lightning-formatted-text class="slds-text-heading_small"
+                            value={_primaryRecord.name}></lightning-formatted-text>
+                    </div>
+                    <div class="slds-col slds-size_1-of-2 slds-text-align_center">
+                        <lightning-formatted-text class="slds-text-heading_small"
+                            value={_secondaryRecord.name}></lightning-formatted-text>
+                    </div>
+                </div>
+                <template for:each={mergeFields} for:item="field">
+                    <div key={field.apiName} class="slds-grid slds-gutters slds-p-vertical_x-small slds-border_bottom">
+                        <div class="slds-col slds-size_1-of-2">
+                            <div class="slds-grid slds-gutters_xx-small slds-grid_vertical-align-center">
+                                <div class="slds-col slds-size_2-of-12 slds-grid slds-grid_align-center">
+                                    <lightning-input
+                                        type="radio"
+                                        variant="label-hidden"
+                                        name={field.apiName}
+                                        value="primary"
+                                        checked={field.choosePrimary}
+                                        data-field={field.apiName}
+                                        data-source="primary"
+                                        onchange={handleFieldChoice}>
+                                    </lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_10-of-12 slds-grid slds-grid_vertical-align-center">
+                                    <span class="slds-text-body_small slds-text-color_weak slds-p-right_x-small">{field.label}</span>
+                                    <span class="slds-border_left slds-p-left_small slds-text-body_regular">{field.primaryValue}</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="slds-col slds-size_1-of-2">
+                            <div class="slds-grid slds-gutters_xx-small slds-grid_vertical-align-center">
+                                <div class="slds-col slds-size_2-of-12 slds-grid slds-grid_align-center">
+                                    <lightning-input
+                                        type="radio"
+                                        variant="label-hidden"
+                                        name={field.apiName}
+                                        value="secondary"
+                                        checked={field.chooseSecondary}
+                                        data-field={field.apiName}
+                                        data-source="secondary"
+                                        onchange={handleFieldChoice}>
+                                    </lightning-input>
+                                </div>
+                                <div class="slds-col slds-size_10-of-12 slds-grid slds-grid_vertical-align-center">
+                                    <span class="slds-text-body_small slds-text-color_weak slds-p-right_x-small">{field.label}</span>
+                                    <span class="slds-border_left slds-p-left_small slds-text-body_regular">{field.secondaryValue}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </template>
             </div>
         </template>
     </lightning-modal-body>
     <lightning-modal-footer>
         <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
-        <lightning-button class="slds-m-left_xx-small" label="Create merge item" variant="brand"
-            onclick={handleSave}></lightning-button>
+        <lightning-button class="slds-m-left_xx-small" label="Back" variant="neutral" onclick={handleBack}></lightning-button>
+        <template lwc:if={showFieldMergeSection}>
+            <lightning-button class="slds-m-left_xx-small" label="Finish" variant="brand"
+                disabled={finishDisabled} onclick={handleFinish}></lightning-button>
+        </template>
+        <template lwc:else>
+            <lightning-button class="slds-m-left_xx-small" label="Continue" variant="brand"
+                disabled={continueDisabled} onclick={handleContinue}></lightning-button>
+        </template>
     </lightning-modal-footer>
 </template>

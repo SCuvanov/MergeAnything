@@ -1,14 +1,24 @@
 import { LightningElement, api, wire } from 'lwc';
 import { getRecord, getRecordNotifyChange, getFieldValue } from 'lightning/uiRecordApi';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
+import executeMergeJob from '@salesforce/apex/BulkMergeController.executeMergeJob';
 
 //FIELDS
 import ID_FIELD from '@salesforce/schema/Merge_Job__c.Id';
 import NAME_FIELD from '@salesforce/schema/Merge_Job__c.Name';
 import STATUS_FIELD from '@salesforce/schema/Merge_Job__c.Status__c';
 
+function apexErrorMessage(error) {
+    if (Array.isArray(error?.body)) {
+        return error.body.map((e) => e.message).join(', ');
+    }
+    return error?.body?.message || error?.message || 'Unknown error';
+}
+
 export default class BulkMergeSecondaryContainer extends LightningElement {
     @api recordId;
     _mergeJob;
+    _executing = false;
 
     @wire(getRecord, {
         recordId: '$recordId',
@@ -39,9 +49,50 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
         return getFieldValue(this._mergeJob, STATUS_FIELD);
     }
 
+    get actionsDisabled() {
+        return this._executing;
+    }
+
     handleRefresh() {
         getRecordNotifyChange([{ recordId: this.recordId }]);
     }
 
-    handleStart() {}
+    async handleStart() {
+        if (!this.recordId || this._executing) {
+            return;
+        }
+
+        this._executing = true;
+        try {
+            const result = await executeMergeJob({ mergeJobId: this.recordId });
+            const ok = result.jobStatus === 'Completed';
+            let message = `${result.successCount} merge item(s) succeeded`;
+            if (result.failureCount > 0) {
+                message += `, ${result.failureCount} failed`;
+            }
+            if (result.errors?.length) {
+                message += `. ${result.errors.join(' ')}`;
+            }
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: ok ? 'Merge job completed' : 'Merge job finished with errors',
+                    message,
+                    variant: ok ? 'success' : 'error',
+                    mode: result.errors?.length > 1 ? 'sticky' : 'dismissable',
+                })
+            );
+            getRecordNotifyChange([{ recordId: this.recordId }]);
+        } catch (error) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Merge job failed',
+                    message: apexErrorMessage(error),
+                    variant: 'error',
+                    mode: 'sticky',
+                })
+            );
+        } finally {
+            this._executing = false;
+        }
+    }
 }

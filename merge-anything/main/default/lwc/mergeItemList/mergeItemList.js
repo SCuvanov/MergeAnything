@@ -1,4 +1,5 @@
 import { LightningElement, api, wire } from 'lwc';
+import { refreshApex } from '@salesforce/apex';
 import getMergeItemsByMergeJobId from '@salesforce/apex/BulkMergeController.getMergeItemsByMergeJobId';
 
 const ALL_MERGE_ITEMS = 'all_merge_items';
@@ -22,6 +23,7 @@ export default class MergeItemList extends LightningElement {
     _filteredMergeItems;
     _mergeView;
     _columns = _columns;
+    _wiredMergeItems;
 
     constructor() {
         super();
@@ -53,7 +55,9 @@ export default class MergeItemList extends LightningElement {
     }
 
     @wire(getMergeItemsByMergeJobId, { mergeJobId: '$_recordId' })
-    wireMergesItems({ error, data }) {
+    wireMergesItems(result) {
+        this._wiredMergeItems = result;
+        const { error, data } = result;
         if (data) {
             this._mergeItems = data;
             this._error = undefined;
@@ -66,6 +70,17 @@ export default class MergeItemList extends LightningElement {
         }
 
         this.filterMergeItems();
+    }
+
+    /**
+     * Re-runs the wired Apex so the datatable reflects new or updated merge items.
+     */
+    @api
+    refreshList() {
+        if (this._wiredMergeItems) {
+            return refreshApex(this._wiredMergeItems);
+        }
+        return Promise.resolve();
     }
 
     filterMergeItems() {
