@@ -70,12 +70,13 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         ];
     }
 
-    get mergeJobListHidden() {
-        return !this._showMergeJobList;
+    /** Only mount merge job table so it does not receive merge-item view values (and vice versa). */
+    get showMergeJobListSection() {
+        return this._showMergeJobList === true;
     }
 
-    get mergeItemListHidden() {
-        return this._showMergeJobList;
+    get showMergeItemListSection() {
+        return this._showMergeJobList === false;
     }
 
     get _mergeViews() {
@@ -196,14 +197,24 @@ export default class BulkMergePrimaryContainer extends LightningElement {
     }
 
     toggleMergeOptionView(value) {
+        const newJobBtn = this.template.querySelector(NEW_MERGE_JOB_BTN_ID);
+        const newItemBtn = this.template.querySelector(NEW_MERGE_ITEM_BTN_ID);
         if (value === MERGE_JOBS) {
-            this.template.querySelector(NEW_MERGE_JOB_BTN_ID).hidden = false;
-            this.template.querySelector(NEW_MERGE_ITEM_BTN_ID).hidden = true;
+            if (newJobBtn) {
+                newJobBtn.hidden = false;
+            }
+            if (newItemBtn) {
+                newItemBtn.hidden = true;
+            }
             this._mergeView = ALL_MERGE_JOBS;
             this._showMergeJobList = true;
         } else {
-            this.template.querySelector(NEW_MERGE_JOB_BTN_ID).hidden = true;
-            this.template.querySelector(NEW_MERGE_ITEM_BTN_ID).hidden = false;
+            if (newJobBtn) {
+                newJobBtn.hidden = true;
+            }
+            if (newItemBtn) {
+                newItemBtn.hidden = false;
+            }
             this._mergeView = ALL_MERGE_ITEMS;
             this._showMergeJobList = false;
         }

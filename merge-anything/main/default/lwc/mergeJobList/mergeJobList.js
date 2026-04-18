@@ -95,6 +95,8 @@ export default class MergeJobList extends LightningElement {
             this._filteredMergeJobs = this._mergeJobs.filter((merge) => merge.Status__c === 'Completed');
         } else if (this._mergeView === FAILED_MERGE_JOBS) {
             this._filteredMergeJobs = this._mergeJobs.filter((merge) => merge.Status__c === 'Failed');
+        } else {
+            this._filteredMergeJobs = this._mergeJobs;
         }
 
         this.setSelectedMerge();

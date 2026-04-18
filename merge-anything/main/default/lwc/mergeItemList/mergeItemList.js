@@ -98,6 +98,8 @@ export default class MergeItemList extends LightningElement {
             this._filteredMergeItems = this._mergeItems.filter((merge) => merge.Status__c === 'Completed');
         } else if (this._mergeView === FAILED_MERGE_ITEMS) {
             this._filteredMergeItems = this._mergeItems.filter((merge) => merge.Status__c === 'Failed');
+        } else {
+            this._filteredMergeItems = this._mergeItems;
         }
     }
 }
