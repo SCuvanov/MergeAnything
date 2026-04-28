@@ -37,6 +37,11 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Merge_Item__c.Primary_Record_Name__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Merge_Item__c.Secondary_Record_Id__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -48,6 +53,11 @@
     <fieldPermissions>
         <editable>false</editable>
         <field>Merge_Item__c.Secondary_Record_Link__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Merge_Item__c.Secondary_Record_Name__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

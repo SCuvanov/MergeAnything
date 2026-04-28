@@ -60,6 +60,8 @@ public with sharing class BulkMergeController {
             Merge_Job__c = mergeJobId,
             Primary_Record_Id__c = primaryRecordId,
             Secondary_Record_Id__c = secondaryRecordId,
+            Primary_Record_Name__c = jsonPayload.primaryRecordName,
+            Secondary_Record_Name__c = jsonPayload.secondaryRecordName,
             Field_Selections_JSON__c = JSON.serialize(selectionsToStore),
             Primary_Record_JSON__c = jsonPayload.primaryJson,
             Secondary_Record_JSON__c = jsonPayload.secondaryJson,
@@ -68,7 +70,15 @@ public with sharing class BulkMergeController {
         insert item;
 
         return [
-            SELECT Id, Name, Link__c, Merge_Job__c
+            SELECT
+                Id,
+                Name,
+                Link__c,
+                Merge_Job__c,
+                Primary_Record_Name__c,
+                Secondary_Record_Name__c,
+                Primary_Record_Link__c,
+                Secondary_Record_Link__c
             FROM Merge_Item__c
             WHERE Id = :item.Id
         ];

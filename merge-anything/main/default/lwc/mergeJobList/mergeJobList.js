@@ -12,10 +12,18 @@ const FAILED_MERGE_JOBS = 'failed_merge_jobs';
 const MERGE_JOB_SELECTED_EVENT = 'mergejobselected';
 
 const _columns = [
-    { label: 'Merge Job Number', fieldName: 'Name' },
+    {
+        label: 'Merge Job Number',
+        fieldName: 'Link__c',
+        type: 'url',
+        typeAttributes: {
+            label: { fieldName: 'Name' },
+            target: '_blank',
+        },
+    },
     { label: 'Merge Job Id', fieldName: 'Id' },
     { label: 'Status', fieldName: 'Status__c' },
-    { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' }
+    { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' },
 ];
 
 export default class MergeJobList extends LightningElement {

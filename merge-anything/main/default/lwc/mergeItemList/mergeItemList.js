@@ -9,13 +9,48 @@ const COMPLETED_MERGE_ITEMS = 'completed_merge_items';
 const FAILED_MERGE_ITEMS = 'failed_merge_items';
 
 const _columns = [
-    { label: 'Merge Item Number', fieldName: 'Name' },
+    {
+        label: 'Merge Item Number',
+        fieldName: 'Link__c',
+        type: 'url',
+        typeAttributes: {
+            label: { fieldName: 'Name' },
+            target: '_blank',
+        },
+    },
     { label: 'Merge Item Id', fieldName: 'Id' },
-    { label: 'Primary Record', fieldName: 'Primary_Record_Id__c' },
-    { label: 'Secondary Record', fieldName: 'Secondary_Record_Id__c' },
+    {
+        label: 'Primary Record',
+        fieldName: 'Primary_Record_Link__c',
+        type: 'url',
+        typeAttributes: {
+            label: { fieldName: '_primaryRecordLabel' },
+            target: '_blank',
+        },
+    },
+    {
+        label: 'Secondary Record',
+        fieldName: 'Secondary_Record_Link__c',
+        type: 'url',
+        typeAttributes: {
+            label: { fieldName: '_secondaryRecordLabel' },
+            target: '_blank',
+        },
+    },
     { label: 'Status', fieldName: 'Status__c' },
     { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' },
 ];
+
+function decorateMergeItemsForDisplay(items) {
+    if (!items) {
+        return items;
+    }
+    return items.map((row) => ({
+        ...row,
+        _primaryRecordLabel: row.Primary_Record_Name__c || row.Primary_Record_Id__c || '',
+        _secondaryRecordLabel: row.Secondary_Record_Name__c || row.Secondary_Record_Id__c || '',
+    }));
+}
 
 export default class MergeItemList extends LightningElement {
     _recordId;
@@ -59,7 +94,7 @@ export default class MergeItemList extends LightningElement {
         this._wiredMergeItems = result;
         const { error, data } = result;
         if (data) {
-            this._mergeItems = data;
+            this._mergeItems = decorateMergeItemsForDisplay(data);
             this._error = undefined;
         } else if (error) {
             this._error = error;

@@ -74,7 +74,7 @@ public class MergeJobSelector {
      */
     public List<Merge_Job__c> getAllMergeJobs() {
         List<Merge_Job__c> mergeJobs = [
-            SELECT Id, CreatedDate, Name, Status__c
+            SELECT Id, CreatedDate, Name, Link__c, Status__c
             FROM Merge_Job__c
             ORDER BY CreatedDate DESC
         ];

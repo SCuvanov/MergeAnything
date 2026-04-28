@@ -60,6 +60,9 @@ public with sharing class RecordSelector {
         public String primaryJson { get; set; }
         public String secondaryJson { get; set; }
         public String mergedJson { get; set; }
+        /** Resolved from the object’s name field (or Id fallback) for list and link labels. */
+        public String primaryRecordName { get; set; }
+        public String secondaryRecordName { get; set; }
     }
 
     private class MergePairContext {
@@ -239,6 +242,28 @@ public with sharing class RecordSelector {
         jsonPayload.primaryJson = JSON.serialize(primaryMap);
         jsonPayload.secondaryJson = JSON.serialize(secondaryMap);
         jsonPayload.mergedJson = JSON.serialize(merged);
+
+        String searchFieldApiName = resolveSearchFieldApiName(ctx.sObjectType);
+        String primaryName = '';
+        String secondaryName = '';
+        if (!String.isBlank(searchFieldApiName)) {
+            Object pObj = ctx.primaryRow.get(searchFieldApiName);
+            Object sObj = ctx.secondaryRow.get(searchFieldApiName);
+            if (pObj != null) {
+                primaryName = String.valueOf(pObj);
+            }
+            if (sObj != null) {
+                secondaryName = String.valueOf(sObj);
+            }
+        }
+        if (String.isBlank(primaryName)) {
+            primaryName = String.valueOf(primaryId);
+        }
+        if (String.isBlank(secondaryName)) {
+            secondaryName = String.valueOf(secondaryId);
+        }
+        jsonPayload.primaryRecordName = trimForTextField(primaryName, 255);
+        jsonPayload.secondaryRecordName = trimForTextField(secondaryName, 255);
         return jsonPayload;
     }
 
@@ -450,6 +475,13 @@ public with sharing class RecordSelector {
         return Math.min(rowLimit, MAX_ROW_LIMIT);
     }
 
+    private static String trimForTextField(String value, Integer maxLen) {
+        if (String.isBlank(value) || maxLen == null || maxLen < 1) {
+            return value;
+        }
+        return value.length() > maxLen ? value.substring(0, maxLen) : value;
+    }
+
     /**
      * @description Deserializes {@code Field_Selections_JSON__c} (JSON array of {@code MergeFieldSelection}). Returns
      *              empty list if blank or invalid JSON.
@@ -626,11 +658,20 @@ public with sharing class RecordSelector {
             return Boolean.valueOf(String.valueOf(raw));
         }
 
+        if (displayType == Schema.DisplayType.INTEGER) {
+            Decimal asDec =
+                raw instanceof Decimal
+                    ? (Decimal) raw
+                    : raw instanceof Integer
+                        ? Decimal.valueOf((Integer) raw)
+                        : Decimal.valueOf(String.valueOf(raw));
+            return asDec.intValue();
+        }
+
         if (
             displayType == Schema.DisplayType.CURRENCY ||
             displayType == Schema.DisplayType.DOUBLE ||
-            displayType == Schema.DisplayType.PERCENT ||
-            displayType == Schema.DisplayType.INTEGER
+            displayType == Schema.DisplayType.PERCENT
         ) {
             return raw instanceof Decimal
                 ? (Decimal) raw

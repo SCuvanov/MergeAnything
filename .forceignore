@@ -13,3 +13,7 @@ package.xml
 
 # Org-internal permission set (not part of this app)
 **/sfdcInternalInt__sfdc_scrt2.permissionset-meta.xml
+
+# Profiles — exclude from source sync (high churn vs orgs; prefer permission sets for this app).
+# To version a profile again, remove these lines or add a negation line after a block, e.g. !merge-anything/main/default/profiles/My.profile-meta.xml
+merge-anything/main/default/profiles/**

@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "skills": {
+    "sf-apex": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "a0effa99e16bc8e18ec43bf3929161310b16830f2edbda29f98cfc1a1e7d48f0"
+    },
+    "sf-data": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "e5ec233c998db2f27a398657be927ed4d39af4ff0409ddb132029eab48f5b661"
+    },
+    "sf-debug": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "45de1ce6c84c5ff8e0a09fca4bed84d6be3e45364b190dc33c001c37f6a6cc45"
+    },
+    "sf-deploy": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "37e48831d68242aedc7aa9eb8861e261e0b858ea906f9a47a52302e1ee8887a1"
+    },
+    "sf-diagram-mermaid": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "7d5986ff6e38ff6bd4603b031e557fc6c0a6bbd60607bfbb0cfd6c8f89204241"
+    },
+    "sf-diagram-nanobananapro": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "e77cb61967bea2556ac0b2cb5e74f28a1c5a170945431f48c4bbb67c2e97e8d5"
+    },
+    "sf-flow": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "98b50bc369f5f7952e20f3aff3e6f0e8eb3b71f6d41cd139a4b667c84511224c"
+    },
+    "sf-lwc": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "bf7fafe60206ae74c2aebf9253a8a047d44d15a2d8395a2432620cb581cacb63"
+    },
+    "sf-metadata": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "66282a6fcec548897a0582f36723cbf630878ca9e36faefad54d3844a21bafd9"
+    },
+    "sf-permissions": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "b70469ce43166771c4f13c92b0aecab426d387a5b89bfb8248b40f39dbcf6ba8"
+    },
+    "sf-soql": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "4c8d2171364cc7ae44f54be162e232ed9adbc27cd59dbb28305b99755a1619e7"
+    },
+    "sf-testing": {
+      "source": "Jaganpro/sf-skills",
+      "sourceType": "github",
+      "computedHash": "f126ff2415fcf46c4037e496fd4d546a4343cf8d395a11e530eb77b7a7e16f87"
+    }
+  }
+}
