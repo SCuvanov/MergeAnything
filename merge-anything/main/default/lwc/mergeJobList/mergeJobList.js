@@ -21,7 +21,6 @@ const _columns = [
             target: '_blank',
         },
     },
-    { label: 'Merge Job Id', fieldName: 'Id' },
     { label: 'Status', fieldName: 'Status__c' },
     { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' },
 ];
@@ -34,14 +33,36 @@ export default class MergeJobList extends LightningElement {
     _selectedMergeJob;
     _mergeView;
     _columns = _columns;
+    _jobsLoadComplete = false;
+    _error;
 
     constructor() {
         super();
-        this._mergeJobs = [];
+        this._mergeJobs = undefined;
         this._filteredMergeJobs = [];
         this._wiredMergeJobs = null;
         this._selectedMergeJob = [];
         this._mergeView = ALL_MERGE_JOBS;
+    }
+
+    get showJobLoading() {
+        return !this._jobsLoadComplete && !this._error;
+    }
+
+    get showJobError() {
+        return this._jobsLoadComplete && this._error;
+    }
+
+    get showJobEmpty() {
+        return this._jobsLoadComplete && !this._error && this._filteredMergeJobs.length === 0;
+    }
+
+    get emptyJobMessage() {
+        const total = this._mergeJobs?.length ?? 0;
+        if (this._mergeView === ALL_MERGE_JOBS || total === 0) {
+            return 'No merge jobs found. Create one with New Merge Job.';
+        }
+        return 'No merge jobs match the current filter.';
     }
 
     @api
@@ -73,16 +94,16 @@ export default class MergeJobList extends LightningElement {
     @wire(getAllMergeJobs, {})
     wireAllMerges(result) {
         this._wiredMergeJobs = result;
+        const { data, error } = result;
 
-        if (result.data) {
-            this._mergeJobs = result.data;
-            this._error = undefined;
-        } else if (result.error) {
-            this._error = result.error;
+        if (error) {
+            this._jobsLoadComplete = true;
+            this._error = error;
             this._mergeJobs = undefined;
-        } else {
+        } else if (data !== undefined) {
+            this._jobsLoadComplete = true;
             this._error = undefined;
-            this._mergeJobs = undefined;
+            this._mergeJobs = data == null ? [] : data;
         }
 
         this.filterMerges();
@@ -90,6 +111,7 @@ export default class MergeJobList extends LightningElement {
 
     filterMerges() {
         if (!this._mergeJobs) {
+            this._filteredMergeJobs = [];
             return;
         }
 

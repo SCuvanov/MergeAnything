@@ -8,7 +8,13 @@
           </div>
           <div class="slds-border_bottom slds-m-top_small"></div>
           <div class="slds-text-heading_medium slds-m-top_small" style="font-weight: var(--lwc-fontWeightBold)">
-            <lightning-formatted-text value={_mergeJobName}></lightning-formatted-text>
+            <template lwc:if={_mergeJobLink}>
+              <lightning-formatted-url label={_mergeJobName} value={_mergeJobLink} target="_blank">
+              </lightning-formatted-url>
+            </template>
+            <template lwc:else>
+              <lightning-formatted-text value={_mergeJobName}></lightning-formatted-text>
+            </template>
           </div>
           <div class="slds-text-heading_small slds-m-top_xx-small" style="font-weight: var(--lwc-fontWeightLight)">
             <lightning-formatted-text class="slds-text-color_weak" value={_mergeJobId}></lightning-formatted-text>
@@ -17,16 +23,35 @@
             <lightning-formatted-text class="slds-text-color_success"
               value={_mergeJobStatus}></lightning-formatted-text>
           </div>
+          <template lwc:if={mergeItemCountDisplay}>
+            <div class="slds-text-body_regular slds-m-top_x-small">
+              <lightning-formatted-text class="slds-text-color_weak" value={mergeItemCountDisplay}>
+              </lightning-formatted-text>
+            </div>
+          </template>
         </div>
         <div class="slds-m-top_large">
           <template lwc:if={_executing}>
-            <lightning-spinner alternative-text="Running merge job" size="small"
+            <lightning-spinner alternative-text="Working" size="small"
               class="slds-m-bottom_x-small"></lightning-spinner>
           </template>
-          <lightning-button variant="neutral" label="Refresh" title="Refresh" icon-name="utility:refresh"
-            onclick={handleRefresh} disabled={actionsDisabled}></lightning-button>
-          <lightning-button variant="brand" label="Start" title="Start" icon-name="utility:play"
-            class="slds-m-left_xx-small" onclick={handleStart} disabled={actionsDisabled}></lightning-button>
+          <template lwc:if={showRunActions}>
+            <lightning-button variant="neutral" label="Refresh" title="Refresh results for this merge job"
+              icon-name="utility:refresh" onclick={handleRefresh} disabled={_executing}></lightning-button>
+            <lightning-button variant="neutral" label="Preview" title="Field-level diff from stored merge data"
+              icon-name="utility:preview" class="slds-m-left_xx-small" onclick={handlePreview} disabled={_executing}>
+            </lightning-button>
+            <lightning-button variant="neutral" label="Validate" title="Check concurrency, stale data, and test updates"
+              icon-name="utility:rules" class="slds-m-left_xx-small" onclick={handleValidate} disabled={_executing}>
+            </lightning-button>
+            <lightning-button variant="brand" label="Start" title="Run merge for pending or failed items"
+              icon-name="utility:play" class="slds-m-left_xx-small" onclick={handleStart} disabled={_executing}>
+            </lightning-button>
+          </template>
+          <template lwc:if={showRollbackAction}>
+            <lightning-button variant="destructive" label="Rollback" title="Restore primary records and undelete secondaries"
+              icon-name="utility:undo" onclick={handleRollback} disabled={_executing}></lightning-button>
+          </template>
         </div>
         <div class="slds-m-top_medium">
           <p>PIE CHART PLACEHOLDER</p>

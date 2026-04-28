@@ -1,4 +1,30 @@
 <template>
-    <lightning-datatable key-field="Id" data={_filteredMergeItems} columns={_columns}
-        hide-checkbox-column="true"></lightning-datatable>
+    <template lwc:if={showNoMergeJob}>
+        <div
+            class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-text-body_regular slds-p-vertical_large">
+            <lightning-icon class="slds-m-right_x-small" icon-name="utility:info" alternative-text=""
+                size="small"></lightning-icon>
+            <lightning-formatted-text value={emptyItemMessage}></lightning-formatted-text>
+        </div>
+    </template>
+    <template lwc:elseif={showItemLoading}>
+        <div class="slds-is-relative slds-p-vertical_large">
+            <lightning-spinner alternative-text="Loading merge items" size="small"></lightning-spinner>
+        </div>
+    </template>
+    <template lwc:elseif={showItemError}>
+        <div class="slds-text-color_error slds-p-around_medium">Unable to load merge items.</div>
+    </template>
+    <template lwc:elseif={showItemEmpty}>
+        <div
+            class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-text-body_regular slds-p-vertical_large">
+            <lightning-icon class="slds-m-right_x-small" icon-name="utility:list" alternative-text=""
+                size="small"></lightning-icon>
+            <lightning-formatted-text value={emptyItemMessage}></lightning-formatted-text>
+        </div>
+    </template>
+    <template lwc:else>
+        <lightning-datatable key-field="Id" data={_filteredMergeItems} columns={_tableColumns}
+            hide-checkbox-column="true" onrowaction={handleRowAction}></lightning-datatable>
+    </template>
 </template>

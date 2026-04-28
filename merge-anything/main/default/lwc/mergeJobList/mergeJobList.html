@@ -1,5 +1,23 @@
 <template>
-    <lightning-datatable key-field="Id" data={_filteredMergeJobs} columns={_columns} selected-rows={_selectedMergeJob}
-        max-row-selection="1" onrowselection={handleMergeJobSelected}>
-    </lightning-datatable>
+    <template lwc:if={showJobLoading}>
+        <div class="slds-is-relative slds-p-vertical_large">
+            <lightning-spinner alternative-text="Loading merge jobs" size="small"></lightning-spinner>
+        </div>
+    </template>
+    <template lwc:elseif={showJobError}>
+        <div class="slds-text-color_error slds-p-around_medium">Unable to load merge jobs.</div>
+    </template>
+    <template lwc:elseif={showJobEmpty}>
+        <div
+            class="slds-grid slds-grid_align-center slds-grid_vertical-align-center slds-text-body_regular slds-p-vertical_large">
+            <lightning-icon class="slds-m-right_x-small" icon-name="utility:list" alternative-text=""
+                size="small"></lightning-icon>
+            <lightning-formatted-text value={emptyJobMessage}></lightning-formatted-text>
+        </div>
+    </template>
+    <template lwc:else>
+        <lightning-datatable key-field="Id" data={_filteredMergeJobs} columns={_columns}
+            selected-rows={_selectedMergeJob} max-row-selection="1" onrowselection={handleMergeJobSelected}>
+        </lightning-datatable>
+    </template>
 </template>

@@ -49,8 +49,8 @@
     <isOmniPinnedViewEnabled>false</isOmniPinnedViewEnabled>
     <label>Merge Anything</label>
     <navType>Standard</navType>
-    <tabs>Merge_Job__c</tabs>
     <tabs>Bulk_Merge</tabs>
+    <tabs>Merge_Job__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Merge_Anything_UtilityBar</utilityBar>
 </CustomApplication>

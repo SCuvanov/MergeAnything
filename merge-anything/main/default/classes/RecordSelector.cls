@@ -44,6 +44,90 @@ public with sharing class RecordSelector {
     }
 
     /**
+     * @description One field row for merge preview (stored JSON), including resolved merged value and source.
+     */
+    public class MergePreviewFieldRow {
+        @AuraEnabled
+        public String apiName { get; set; }
+        @AuraEnabled
+        public String label { get; set; }
+        @AuraEnabled
+        public String primaryValue { get; set; }
+        @AuraEnabled
+        public String secondaryValue { get; set; }
+        @AuraEnabled
+        public String mergedValue { get; set; }
+        @AuraEnabled
+        public String valueSource { get; set; }
+    }
+
+    /**
+     * @description Field-level preview from stored primary, secondary, and merged JSON snapshots.
+     */
+    public List<MergePreviewFieldRow> buildMergePreviewFieldRowsFromJson(
+        String sObjectApiName,
+        String primaryJson,
+        String secondaryJson,
+        String mergedJson
+    ) {
+        List<MergePreviewFieldRow> rows = new List<MergePreviewFieldRow>();
+        if (String.isBlank(mergedJson) || String.isBlank(sObjectApiName)) {
+            return rows;
+        }
+
+        Schema.SObjectType sobType = resolveSObjectType(sObjectApiName);
+        if (sobType == null) {
+            return rows;
+        }
+
+        Map<String, Object> primaryMap = String.isBlank(primaryJson)
+            ? new Map<String, Object>()
+            : (Map<String, Object>) JSON.deserializeUntyped(primaryJson);
+        Map<String, Object> secondaryMap = String.isBlank(secondaryJson)
+            ? new Map<String, Object>()
+            : (Map<String, Object>) JSON.deserializeUntyped(secondaryJson);
+        Map<String, Object> mergedMap = (Map<String, Object>) JSON.deserializeUntyped(mergedJson);
+
+        Map<String, Schema.SObjectField> fieldMap = sobType.getDescribe().fields.getMap();
+        List<String> ordered = new List<String>(mergedMap.keySet());
+        ordered.sort();
+
+        for (String fieldName : ordered) {
+            if (fieldName == null || fieldName.equalsIgnoreCase('Id')) {
+                continue;
+            }
+
+            Schema.SObjectField fieldToken = fieldMap.get(fieldName);
+            if (fieldToken == null) {
+                continue;
+            }
+            Schema.DescribeFieldResult dfr = fieldToken.getDescribe();
+            if (!dfr.isAccessible()) {
+                continue;
+            }
+
+            MergePreviewFieldRow row = new MergePreviewFieldRow();
+            row.apiName = fieldName;
+            row.label = dfr.getLabel();
+            Object pv = primaryMap.get(fieldName);
+            Object sv = secondaryMap.get(fieldName);
+            Object mv = mergedMap.get(fieldName);
+            row.primaryValue = formatFieldValueForDisplay(pv, dfr);
+            row.secondaryValue = formatFieldValueForDisplay(sv, dfr);
+            row.mergedValue = formatFieldValueForDisplay(mv, dfr);
+            if (jsonSnapshotValuesEqual(mv, pv)) {
+                row.valueSource = 'Primary';
+            } else if (jsonSnapshotValuesEqual(mv, sv)) {
+                row.valueSource = 'Secondary';
+            } else {
+                row.valueSource = '\u2014';
+            }
+            rows.add(row);
+        }
+        return rows;
+    }
+
+    /**
      * @description Field-level choice when persisting a merge (use primary vs secondary value).
      */
     public class MergeFieldSelection {
@@ -560,9 +644,9 @@ public with sharing class RecordSelector {
     }
 
     /**
-     * @description Applies merged field values to the surviving (primary) record Id.
+     * @description Builds the surviving primary row from merged JSON (FLS-stripped). Does not perform DML.
      */
-    public void updateSurvivorFromMergedJson(String sObjectApiName, Id survivorId, String mergedJson) {
+    public SObject buildSurvivorUpdateRowFromMergedJson(String sObjectApiName, Id survivorId, String mergedJson) {
         if (String.isBlank(mergedJson) || survivorId == null) {
             throw new AuraHandledException('Cannot apply merge: missing merged data.');
         }
@@ -601,7 +685,14 @@ public with sharing class RecordSelector {
         if (safeRows.isEmpty()) {
             throw new AuraHandledException('Could not update record after field security checks.');
         }
-        update safeRows[0];
+        return safeRows[0];
+    }
+
+    /**
+     * @description Applies merged field values to the surviving (primary) record Id.
+     */
+    public void updateSurvivorFromMergedJson(String sObjectApiName, Id survivorId, String mergedJson) {
+        update buildSurvivorUpdateRowFromMergedJson(sObjectApiName, survivorId, mergedJson);
     }
 
     private static Time parseTimeFromSerializedValue(String s) {

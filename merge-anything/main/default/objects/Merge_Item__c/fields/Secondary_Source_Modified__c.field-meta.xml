@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Secondary_Source_Modified__c</fullName>
+    <description>LastModifiedDate of the secondary record when merge item snapshots were captured.</description>
+    <inlineHelpText>Used to detect whether the secondary record changed after this merge item was defined.</inlineHelpText>
+    <label>Secondary Source Modified</label>
+    <required>false</required>
+    <trackTrending>false</trackTrending>
+    <type>DateTime</type>
+</CustomField>

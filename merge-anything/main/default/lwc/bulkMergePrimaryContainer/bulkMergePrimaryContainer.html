@@ -9,9 +9,10 @@
         </div>
         <div class="slds-col">
           <lightning-button data-id="newMergeJobBtn" variant="neutral" label="New Merge Job" title="New Merge Job"
-            icon-name="utility:add" onclick={handleNewMergeJob}></lightning-button>
-          <lightning-button data-id="newMergeItemBtn" variant="neutral" label="New Merge Item" title="New Merge Item"
-            icon-name="utility:add" onclick={handleNewMergeItem} hidden></lightning-button>
+            icon-name="utility:add" onclick={handleNewMergeJob} hidden={hideNewMergeJobButton}></lightning-button>
+          <lightning-button data-id="newMergeItemBtn" variant="neutral" label="New Merge Item"
+            title="New Merge Item (not available for completed jobs)" icon-name="utility:add"
+            onclick={handleNewMergeItem} hidden={hideNewMergeItemButton}></lightning-button>
         </div>
       </div>
 

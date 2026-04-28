@@ -1,0 +1,31 @@
+<template>
+  <lightning-modal-header label="Merge preview"></lightning-modal-header>
+  <lightning-modal-body>
+    <template lwc:if={loadError}>
+      <div class="slds-text-color_error">{loadError}</div>
+    </template>
+    <template lwc:elseif={showEmpty}>
+      <p class="slds-text-body_regular">No pending or failed merge items with stored merged data to preview.</p>
+    </template>
+    <template lwc:else>
+      <template for:each={sections} for:item="sec">
+        <div key={sec.mergeItemId} class="slds-m-bottom_medium">
+          <h3 class="slds-text-heading_small slds-m-bottom_x-small">
+            <span>{sec.mergeItemName}</span>
+            <span class="slds-text-color_weak slds-m-left_x-small">({sec.objectApiName})</span>
+          </h3>
+          <lightning-datatable
+            key={sec.mergeItemId}
+            hide-checkbox-column
+            data={sec.fieldRows}
+            columns={previewColumns}
+          >
+          </lightning-datatable>
+        </div>
+      </template>
+    </template>
+  </lightning-modal-body>
+  <lightning-modal-footer>
+    <lightning-button label="Close" onclick={handleClose}></lightning-button>
+  </lightning-modal-footer>
+</template>

@@ -37,7 +37,10 @@ public class MergeItemSelector {
                 Secondary_Record_Name__c,
                 Secondary_Record_Link__c,
                 Secondary_Record_JSON__c,
-                Status__c
+                Primary_Source_Modified__c,
+                Secondary_Source_Modified__c,
+                Status__c,
+                Merge_Error__c
             FROM Merge_Item__c
             WHERE Id IN :mergeItemIds
         ];
@@ -66,7 +69,10 @@ public class MergeItemSelector {
                 Secondary_Record_Name__c,
                 Secondary_Record_Link__c,
                 Secondary_Record_JSON__c,
-                Status__c
+                Primary_Source_Modified__c,
+                Secondary_Source_Modified__c,
+                Status__c,
+                Merge_Error__c
             FROM Merge_Item__c
             WHERE Merge_Job__c = :mergeJobId
         ];

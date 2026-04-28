@@ -1,5 +1,5 @@
 import { LightningElement, api, wire } from 'lwc';
-import { getRecord } from 'lightning/uiRecordApi';
+import { getRecord, getFieldValue } from 'lightning/uiRecordApi';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import createMergeJob from '@salesforce/apex/BulkMergeController.createMergeJob';
 import NewMergeJobModal from 'c/newMergeJobModal';
@@ -18,10 +18,6 @@ const IN_PROGRESS_MERGE_ITEMS = 'in_progress_merge_items';
 const COMPLETED_MERGE_ITEMS = 'completed_merge_items';
 const FAILED_MERGE_ITEMS = 'failed_merge_items';
 const SUCCESS = 'success';
-
-//UI
-const NEW_MERGE_JOB_BTN_ID = 'lightning-button[data-id=newMergeJobBtn]';
-const NEW_MERGE_ITEM_BTN_ID = 'lightning-button[data-id=newMergeItemBtn]';
 
 //EVENTS
 const MERGE_JOB_CREATED_EVENT = 'mergejobcreated';
@@ -101,6 +97,22 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         return mergeViews;
     }
 
+    get mergeJobStatus() {
+        return getFieldValue(this._mergeJob, STATUS_FIELD);
+    }
+
+    get isMergeJobCompleted() {
+        return this.mergeJobStatus === 'Completed';
+    }
+
+    get hideNewMergeJobButton() {
+        return !this._showMergeJobList;
+    }
+
+    get hideNewMergeItemButton() {
+        return this._showMergeJobList || this.isMergeJobCompleted;
+    }
+
     handleMergeOption(event) {
         this._mergeOption = event.detail.value;
         this.toggleMergeOptionView(this._mergeOption);
@@ -134,6 +146,9 @@ export default class BulkMergePrimaryContainer extends LightningElement {
     }
 
     async handleNewMergeItem() {
+        if (this.isMergeJobCompleted) {
+            return;
+        }
         const result = await NewMergeItemModal.open({
             size: 'small',
             mergeJobId: this.recordId
@@ -197,24 +212,10 @@ export default class BulkMergePrimaryContainer extends LightningElement {
     }
 
     toggleMergeOptionView(value) {
-        const newJobBtn = this.template.querySelector(NEW_MERGE_JOB_BTN_ID);
-        const newItemBtn = this.template.querySelector(NEW_MERGE_ITEM_BTN_ID);
         if (value === MERGE_JOBS) {
-            if (newJobBtn) {
-                newJobBtn.hidden = false;
-            }
-            if (newItemBtn) {
-                newItemBtn.hidden = true;
-            }
             this._mergeView = ALL_MERGE_JOBS;
             this._showMergeJobList = true;
         } else {
-            if (newJobBtn) {
-                newJobBtn.hidden = true;
-            }
-            if (newItemBtn) {
-                newItemBtn.hidden = false;
-            }
             this._mergeView = ALL_MERGE_ITEMS;
             this._showMergeJobList = false;
         }

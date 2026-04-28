@@ -15,32 +15,71 @@ public class EntityDefinitionSelector {
     }
 
     /**
-     * @description Returns a list of `EntityDefinition` records by the given label
-     * @return        The List of `EntityDefinition` records
+     * @description Returns entity definitions whose labels match the search, limited to sObjects the running user
+     *              can query, read, update, and delete (required for merge operations).
      */
     public List<EntityDefinition> getEntityDefinitionsByLabel(String label) {
-        if (String.isBlank(label))
+        if (String.isBlank(label)) {
             return new List<EntityDefinition>();
+        }
 
         String searchValue = '%' + label + '%';
 
-        return [
+        List<EntityDefinition> rows = [
             SELECT MasterLabel, QualifiedApiName, NamespacePrefix
             FROM EntityDefinition
             WHERE MasterLabel LIKE :searchValue
             ORDER BY QualifiedApiName
         ];
+        return filterMergeableByUserCrud(rows);
     }
 
     /**
-     * @description Returns a list of all `EntityDefinition` records
-     * @return        The List of `EntityDefinition` records
+     * @description Returns all entity definitions limited to sObjects the running user can query, read, update, and
+     *              delete (required for merge operations).
      */
     public List<EntityDefinition> getAllEntityDefinitions() {
-        return [
+        List<EntityDefinition> rows = [
             SELECT MasterLabel, QualifiedApiName, NamespacePrefix
             FROM EntityDefinition
             ORDER BY QualifiedApiName
         ];
+        return filterMergeableByUserCrud(rows);
+    }
+
+    /**
+     * @description Keeps {@link EntityDefinition} rows whose API name resolves to an sObject the current user can
+     *              query ({@code isQueryable}), read ({@code isAccessible}), update ({@code isUpdateable}), and
+     *              delete ({@code isDeletable}).
+     */
+    private List<EntityDefinition> filterMergeableByUserCrud(List<EntityDefinition> rows) {
+        if (rows == null || rows.isEmpty()) {
+            return rows == null ? new List<EntityDefinition>() : rows;
+        }
+
+        Map<String, Schema.SObjectType> globalDescribe = Schema.getGlobalDescribe();
+        List<EntityDefinition> filtered = new List<EntityDefinition>();
+
+        for (EntityDefinition row : rows) {
+            if (row == null || String.isBlank(row.QualifiedApiName)) {
+                continue;
+            }
+
+            Schema.SObjectType sobType = globalDescribe.get(row.QualifiedApiName.toLowerCase());
+            if (sobType == null) {
+                continue;
+            }
+
+            Schema.DescribeSObjectResult dsr = sobType.getDescribe();
+            if (
+                dsr.isDeprecatedAndHidden() || !dsr.isAccessible() || !dsr.isQueryable() ||
+                !dsr.isUpdateable() || !dsr.isDeletable()
+            ) {
+                continue;
+            }
+
+            filtered.add(row);
+        }
+        return filtered;
     }
 }

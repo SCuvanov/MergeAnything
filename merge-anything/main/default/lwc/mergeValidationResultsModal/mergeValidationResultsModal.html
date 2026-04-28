@@ -1,0 +1,47 @@
+<template>
+  <lightning-modal-header label="Validate merge job"></lightning-modal-header>
+  <lightning-modal-body>
+    <template lwc:if={result}>
+      <p class={summaryClass}>{summaryTitle}</p>
+
+      <template lwc:if={hasJobLevelErrors}>
+        <h3 class="slds-text-heading_small slds-m-top_medium slds-m-bottom_x-small">Job-level</h3>
+        <ul class="slds-list_dotted">
+          <template for:each={jobLevelErrorRows} for:item="row">
+            <li key={row.key}>{row.text}</li>
+          </template>
+        </ul>
+      </template>
+
+      <h3 class="slds-text-heading_small slds-m-top_medium slds-m-bottom_x-small">Per merge item</h3>
+      <template for:each={decoratedItems} for:item="row">
+        <div key={row.rowKey} class="slds-box slds-m-bottom_small">
+          <p class="slds-text-body_medium">
+            <strong>{row.mergeItemName}</strong>
+            <span class="slds-badge slds-m-left_x-small">{row.statusLabel}</span>
+          </p>
+          <template lwc:if={row.hasErrors}>
+            <ul class="slds-list_dotted slds-text-color_error slds-m-top_xx-small">
+              <template for:each={row.safeErrors} for:item="errRow">
+                <li key={errRow.key}>{errRow.text}</li>
+              </template>
+            </ul>
+          </template>
+          <template lwc:if={row.hasWarnings}>
+            <ul class="slds-list_dotted slds-text-color_weak slds-m-top_xx-small">
+              <template for:each={row.safeWarnings} for:item="wRow">
+                <li key={wRow.key}>{wRow.text}</li>
+              </template>
+            </ul>
+          </template>
+        </div>
+      </template>
+    </template>
+    <template lwc:else>
+      <p>No validation result.</p>
+    </template>
+  </lightning-modal-body>
+  <lightning-modal-footer>
+    <lightning-button label="Close" onclick={handleClose}></lightning-button>
+  </lightning-modal-footer>
+</template>
