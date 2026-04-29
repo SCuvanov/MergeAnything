@@ -90,10 +90,10 @@
                     </div>
                 </div>
                 <template for:each={mergeFields} for:item="field">
-                    <div key={field.apiName} class="slds-grid slds-gutters slds-p-vertical_x-small slds-border_bottom">
+                    <div key={field.apiName} class="slds-grid slds-gutters slds-grid_vertical-align-center slds-p-vertical_x-small slds-border_bottom field-merge-field-row">
                         <div class="slds-col slds-size_1-of-2">
                             <div class="slds-grid slds-gutters_xx-small slds-grid_vertical-align-center">
-                                <div class="slds-col slds-size_2-of-12 slds-grid slds-grid_align-center">
+                                <div class="slds-col slds-size_2-of-12 slds-grid slds-grid_align-center slds-grid_vertical-align-center">
                                     <lightning-input
                                         type="radio"
                                         variant="label-hidden"
@@ -105,15 +105,22 @@
                                         onchange={handleFieldChoice}>
                                     </lightning-input>
                                 </div>
-                                <div class="slds-col slds-size_10-of-12 slds-grid slds-grid_vertical-align-center">
-                                    <span class="slds-text-body_small slds-text-color_weak slds-p-right_x-small">{field.label}</span>
-                                    <span class="slds-border_left slds-p-left_small slds-text-body_regular">{field.primaryValue}</span>
+                                <div class="slds-col slds-size_10-of-12">
+                                    <div class="field-merge-value-row">
+                                        <div class="field-merge-value-row__label">
+                                            <span class="slds-text-body_small slds-text-color_weak">{field.label}</span>
+                                        </div>
+                                        <div class="field-merge-value-row__divider" aria-hidden="true"></div>
+                                        <div class="field-merge-value-row__value">
+                                            <span class="slds-text-body_regular">{field.primaryValue}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                         <div class="slds-col slds-size_1-of-2">
                             <div class="slds-grid slds-gutters_xx-small slds-grid_vertical-align-center">
-                                <div class="slds-col slds-size_2-of-12 slds-grid slds-grid_align-center">
+                                <div class="slds-col slds-size_2-of-12 slds-grid slds-grid_align-center slds-grid_vertical-align-center">
                                     <lightning-input
                                         type="radio"
                                         variant="label-hidden"
@@ -125,9 +132,16 @@
                                         onchange={handleFieldChoice}>
                                     </lightning-input>
                                 </div>
-                                <div class="slds-col slds-size_10-of-12 slds-grid slds-grid_vertical-align-center">
-                                    <span class="slds-text-body_small slds-text-color_weak slds-p-right_x-small">{field.label}</span>
-                                    <span class="slds-border_left slds-p-left_small slds-text-body_regular">{field.secondaryValue}</span>
+                                <div class="slds-col slds-size_10-of-12">
+                                    <div class="field-merge-value-row">
+                                        <div class="field-merge-value-row__label">
+                                            <span class="slds-text-body_small slds-text-color_weak">{field.label}</span>
+                                        </div>
+                                        <div class="field-merge-value-row__divider" aria-hidden="true"></div>
+                                        <div class="field-merge-value-row__value">
+                                            <span class="slds-text-body_regular">{field.secondaryValue}</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>

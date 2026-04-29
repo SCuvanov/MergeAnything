@@ -24,7 +24,14 @@
         </div>
     </template>
     <template lwc:else>
-        <lightning-datatable key-field="Id" data={_filteredMergeItems} columns={_tableColumns}
-            hide-checkbox-column="true" onrowaction={handleRowAction}></lightning-datatable>
+        <div class="merge-datatable-room">
+            <lightning-datatable
+                key-field="Id"
+                data={_filteredMergeItems}
+                columns={_tableColumns}
+                hide-checkbox-column="true"
+                onrowaction={handleRowAction}
+            ></lightning-datatable>
+        </div>
     </template>
 </template>

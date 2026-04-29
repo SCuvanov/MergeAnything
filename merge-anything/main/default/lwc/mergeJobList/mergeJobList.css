@@ -1,0 +1,34 @@
+:host {
+    display: block;
+}
+
+/* Top: Show Me (shrink to control width). Bottom: filters full width, same left origin (no gutter negative margin). */
+.merge-job-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--lwc-spacingSmall, 0.75rem);
+}
+
+.merge-job-toolbar__showme {
+    flex: 0 0 auto;
+    max-width: 100%;
+}
+
+.merge-job-toolbar__showme ::slotted(lightning-combobox) {
+    display: block;
+    min-width: 12rem;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.merge-job-toolbar__filters {
+    align-self: stretch;
+    width: 100%;
+    gap: var(--lwc-spacingSmall, 0.75rem);
+}
+
+/* Extra space below the table so row action menus are not clipped by the card / viewport */
+.merge-datatable-room {
+    padding-bottom: var(--lwc-spacingXLarge, 2rem);
+}

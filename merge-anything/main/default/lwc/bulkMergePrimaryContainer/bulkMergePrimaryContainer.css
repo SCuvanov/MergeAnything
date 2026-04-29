@@ -1,0 +1,25 @@
+/* Stack: Show Me on top (compact width), filters below, shared left edge (no slds-gutters offset). */
+.item-filter-toolbar {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--lwc-spacingSmall, 0.75rem);
+}
+
+.item-filter-toolbar__showme {
+    flex: 0 0 auto;
+    max-width: 100%;
+}
+
+.item-filter-toolbar__showme lightning-combobox {
+    display: block;
+    min-width: 12rem;
+    width: fit-content;
+    max-width: 100%;
+}
+
+.item-filter-toolbar__filters {
+    align-self: stretch;
+    width: 100%;
+    gap: var(--lwc-spacingSmall, 0.75rem);
+}

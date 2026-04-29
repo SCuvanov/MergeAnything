@@ -26,4 +26,11 @@ export default class BulkMergeMasterContainer extends LightningElement {
     handleMergeJobCreated(event) {
         this._recordId = event.detail;
     }
+
+    handleMergeItemsInvalidated() {
+        const secondary = this.template.querySelector('c-bulk-merge-secondary-container');
+        if (secondary) {
+            secondary.refreshMergeItemCount();
+        }
+    }
 }

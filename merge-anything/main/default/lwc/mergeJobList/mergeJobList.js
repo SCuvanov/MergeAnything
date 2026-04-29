@@ -1,6 +1,9 @@
 import { LightningElement, api, wire } from 'lwc';
 import { refreshApex } from '@salesforce/apex';
 import getAllMergeJobs from '@salesforce/apex/BulkMergeController.getAllMergeJobs';
+import deleteMergeJob from '@salesforce/apex/BulkMergeController.deleteMergeJob';
+import MergeConfirmationModal from 'c/mergeConfirmationModal';
+import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
 const ALL_MERGE_JOBS = 'all_merge_jobs';
 const PENDING_MERGE_JOBS = 'pending_merge_jobs';
@@ -11,7 +14,7 @@ const FAILED_MERGE_JOBS = 'failed_merge_jobs';
 //EVENTS
 const MERGE_JOB_SELECTED_EVENT = 'mergejobselected';
 
-const _columns = [
+const JOB_BASE_COLUMNS = [
     {
         label: 'Merge Job Number',
         fieldName: 'Link__c',
@@ -36,6 +39,13 @@ function decorateMergeJobsForDisplay(jobs) {
     }));
 }
 
+function apexErrorMessage(error) {
+    if (Array.isArray(error?.body)) {
+        return error.body.map((e) => e.message).join(', ');
+    }
+    return error?.body?.message || error?.message || 'Unknown error';
+}
+
 export default class MergeJobList extends LightningElement {
     _recordId;
     _mergeJobs;
@@ -43,7 +53,7 @@ export default class MergeJobList extends LightningElement {
     _wiredMergeJobs;
     _selectedMergeJob;
     _mergeView;
-    _columns = _columns;
+    _columns;
     _jobsLoadComplete = false;
     _error;
     _jobCreatedByFilter = '';
@@ -57,6 +67,25 @@ export default class MergeJobList extends LightningElement {
         this._wiredMergeJobs = null;
         this._selectedMergeJob = [];
         this._mergeView = ALL_MERGE_JOBS;
+        const boundRowActions = this.computeRowActions.bind(this);
+        this._columns = [
+            ...JOB_BASE_COLUMNS,
+            {
+                type: 'action',
+                typeAttributes: {
+                    rowActions: boundRowActions,
+                    menuAlignment: 'auto',
+                },
+            },
+        ];
+    }
+
+    computeRowActions(row, doneCallback) {
+        const actions = [];
+        if (row.Status__c !== 'In Progress') {
+            actions.push({ label: 'Delete', name: 'delete', iconName: 'utility:delete' });
+        }
+        doneCallback(actions);
     }
 
     get showJobLoading() {
@@ -67,24 +96,24 @@ export default class MergeJobList extends LightningElement {
         return this._jobsLoadComplete && this._error;
     }
 
-    get showJobEmpty() {
-        return this._jobsLoadComplete && !this._error && this._filteredMergeJobs.length === 0;
+    get showNoJobsAtAll() {
+        return (
+            this._jobsLoadComplete &&
+            !this._error &&
+            (this._mergeJobs === undefined || this._mergeJobs.length === 0)
+        );
+    }
+
+    get showFilteredJobEmpty() {
+        return (this._filteredMergeJobs?.length ?? 0) === 0;
     }
 
     get emptyJobMessage() {
         const total = this._mergeJobs?.length ?? 0;
-        const hasRowFilters =
-            !!this._jobCreatedByFilter ||
-            !!this._jobDateFrom ||
-            !!this._jobDateTo;
-        if ((this._mergeView === ALL_MERGE_JOBS && !hasRowFilters) || total === 0) {
+        if (total === 0) {
             return 'No merge jobs found. Create one with New Merge Job.';
         }
         return 'No merge jobs match the current filter.';
-    }
-
-    get showJobFilters() {
-        return this._jobsLoadComplete && !this._error && (this._mergeJobs?.length ?? 0) > 0;
     }
 
     get creatorFilterOptions() {
@@ -131,6 +160,23 @@ export default class MergeJobList extends LightningElement {
         this.filterMerges();
     }
 
+    @api
+    refreshList() {
+        if (this._wiredMergeJobs) {
+            return refreshApex(this._wiredMergeJobs);
+        }
+        return Promise.resolve();
+    }
+
+    dispatchMergeItemsInvalidated() {
+        this.dispatchEvent(
+            new CustomEvent('mergeitemsinvalidated', {
+                bubbles: true,
+                composed: true,
+            }),
+        );
+    }
+
     @wire(getAllMergeJobs, {})
     wireAllMerges(result) {
         this._wiredMergeJobs = result;
@@ -171,7 +217,7 @@ export default class MergeJobList extends LightningElement {
 
         if (this._jobCreatedByFilter) {
             this._filteredMergeJobs = this._filteredMergeJobs.filter(
-                (merge) => merge.CreatedById === this._jobCreatedByFilter
+                (merge) => merge.CreatedById === this._jobCreatedByFilter,
             );
         }
         if (this._jobDateFrom) {
@@ -199,13 +245,24 @@ export default class MergeJobList extends LightningElement {
         this.filterMerges();
     }
 
-    handleJobDateFromChange(event) {
+    handleJobDateFromChangeNative(event) {
         this._jobDateFrom = event.target.value || '';
         this.filterMerges();
     }
 
-    handleJobDateToChange(event) {
+    handleJobDateToChangeNative(event) {
         this._jobDateTo = event.target.value || '';
+        this.filterMerges();
+    }
+
+    get jobFiltersResetDisabled() {
+        return !this._jobCreatedByFilter && !this._jobDateFrom && !this._jobDateTo;
+    }
+
+    handleResetJobFilters() {
+        this._jobCreatedByFilter = '';
+        this._jobDateFrom = '';
+        this._jobDateTo = '';
         this.filterMerges();
     }
 
@@ -219,6 +276,55 @@ export default class MergeJobList extends LightningElement {
             this._selectedMergeJob = [];
         } else {
             this._selectedMergeJob = [this._recordId];
+        }
+    }
+
+    async handleRowAction(event) {
+        const { action, row } = event.detail;
+        if (action.name !== 'delete') {
+            return;
+        }
+
+        const confirmed = await MergeConfirmationModal.open({
+            size: 'small',
+            headerLabel: 'Delete merge job?',
+            bodyMessage: `Permanently delete merge job "${row.Name}" and all of its merge items? You cannot delete a job that has completed merge items until you roll back the job.`,
+        });
+        if (!confirmed) {
+            return;
+        }
+
+        const wasSelected = row.Id === this._recordId;
+
+        try {
+            await deleteMergeJob({ mergeJobId: row.Id });
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Merge job deleted',
+                    message: 'The merge job and its items were removed.',
+                    variant: 'success',
+                }),
+            );
+            await this.refreshList();
+            this.dispatchMergeItemsInvalidated();
+            if (wasSelected) {
+                this.dispatchEvent(
+                    new CustomEvent(MERGE_JOB_SELECTED_EVENT, {
+                        detail: undefined,
+                        bubbles: true,
+                        composed: true,
+                    }),
+                );
+            }
+        } catch (err) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Delete failed',
+                    message: apexErrorMessage(err),
+                    variant: 'error',
+                    mode: 'sticky',
+                }),
+            );
         }
     }
 
@@ -238,9 +344,8 @@ export default class MergeJobList extends LightningElement {
         this._recordId = event.detail.selectedRows[0].Id;
         this.setSelectedMerge();
 
-        //DISPATCH MERGE SELECTED EVENT
         const mergeJobSelectedEvent = new CustomEvent(MERGE_JOB_SELECTED_EVENT, {
-            detail: this._recordId
+            detail: this._recordId,
         });
         this.dispatchEvent(mergeJobSelectedEvent);
     }

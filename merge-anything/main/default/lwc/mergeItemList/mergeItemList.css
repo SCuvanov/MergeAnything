@@ -1,0 +1,8 @@
+:host {
+    display: block;
+}
+
+/* Extra space below the table so row action menus can open without sitting flush against the card edge */
+.merge-datatable-room {
+    padding-bottom: var(--lwc-spacingXLarge, 2rem);
+}

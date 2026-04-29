@@ -45,6 +45,122 @@ public with sharing class BulkMergeController {
         ];
     }
 
+    @AuraEnabled(cacheable=true)
+    public static List<MergeItemStatusCountRow> getMergeItemStatusCountsByMergeJobId(Id mergeJobId) {
+        Map<String, Integer> countsByStatus = new Map<String, Integer>();
+        if (mergeJobId != null) {
+            for (AggregateResult ar : [
+                SELECT Status__c, COUNT(Id)
+                FROM Merge_Item__c
+                WHERE Merge_Job__c = :mergeJobId
+                WITH SECURITY_ENFORCED
+                GROUP BY Status__c
+            ]) {
+                String st = (String) ar.get('Status__c');
+                if (String.isBlank(st)) {
+                    continue;
+                }
+                Decimal raw = (Decimal) ar.get('expr0');
+                countsByStatus.put(st, raw == null ? 0 : raw.intValue());
+            }
+        }
+
+        List<String> ordered = new List<String>{ 'Pending', 'In Progress', 'Completed', 'Failed' };
+        List<MergeItemStatusCountRow> rows = new List<MergeItemStatusCountRow>();
+        Set<String> seen = new Set<String>();
+        for (String st : ordered) {
+            MergeItemStatusCountRow row = new MergeItemStatusCountRow();
+            row.status = st;
+            row.itemCount = countsByStatus.containsKey(st) ? countsByStatus.get(st) : 0;
+            rows.add(row);
+            seen.add(st);
+        }
+        for (String st : countsByStatus.keySet()) {
+            if (!seen.contains(st)) {
+                MergeItemStatusCountRow row = new MergeItemStatusCountRow();
+                row.status = st;
+                row.itemCount = countsByStatus.get(st);
+                rows.add(row);
+            }
+        }
+        return rows;
+    }
+
+    @AuraEnabled
+    public static void deleteMergeItem(Id mergeItemId) {
+        if (mergeItemId == null) {
+            throw new AuraHandledException('Merge Item Id is required.');
+        }
+        List<Merge_Item__c> rows = [
+            SELECT Id, Status__c, Merge_Job__c
+            FROM Merge_Item__c
+            WHERE Id = :mergeItemId
+            WITH SECURITY_ENFORCED
+            LIMIT 1
+        ];
+        if (rows.isEmpty()) {
+            throw new AuraHandledException('Merge item was not found.');
+        }
+        Merge_Item__c item = rows[0];
+        if ('Completed'.equals(item.Status__c)) {
+            throw new AuraHandledException(
+                'Completed merge items cannot be deleted. Roll back the item first if you need to remove it.'
+            );
+        }
+        List<Merge_Job__c> jobs = [
+            SELECT Id, Status__c
+            FROM Merge_Job__c
+            WHERE Id = :item.Merge_Job__c
+            WITH SECURITY_ENFORCED
+            LIMIT 1
+        ];
+        if (jobs.isEmpty()) {
+            throw new AuraHandledException('Merge job was not found.');
+        }
+        if ('In Progress'.equals(jobs[0].Status__c)) {
+            throw new AuraHandledException('Cannot delete merge items while the merge job is in progress.');
+        }
+        if (!Merge_Item__c.SObjectType.getDescribe().isDeletable()) {
+            throw new AuraHandledException('You do not have permission to delete merge items.');
+        }
+        delete item;
+    }
+
+    @AuraEnabled
+    public static void deleteMergeJob(Id mergeJobId) {
+        if (mergeJobId == null) {
+            throw new AuraHandledException('Merge Job Id is required.');
+        }
+        List<Merge_Job__c> jobs = [
+            SELECT Id, Status__c
+            FROM Merge_Job__c
+            WHERE Id = :mergeJobId
+            WITH SECURITY_ENFORCED
+            LIMIT 1
+        ];
+        if (jobs.isEmpty()) {
+            throw new AuraHandledException('Merge job was not found.');
+        }
+        if ('In Progress'.equals(jobs[0].Status__c)) {
+            throw new AuraHandledException('Cannot delete a merge job while it is in progress.');
+        }
+        Integer completedCount = [
+            SELECT COUNT()
+            FROM Merge_Item__c
+            WHERE Merge_Job__c = :mergeJobId AND Status__c = 'Completed'
+            WITH SECURITY_ENFORCED
+        ];
+        if (completedCount > 0) {
+            throw new AuraHandledException(
+                'This merge job has completed merge items. Roll back the merge job before deleting it.'
+            );
+        }
+        if (!Merge_Job__c.SObjectType.getDescribe().isDeletable()) {
+            throw new AuraHandledException('You do not have permission to delete merge jobs.');
+        }
+        delete jobs[0];
+    }
+
     @AuraEnabled
     public static MergeJob createMergeJob() {
         return new MergeJob().create();
@@ -108,7 +224,7 @@ public with sharing class BulkMergeController {
             Merged_Record_JSON__c = jsonPayload.mergedJson,
             Primary_Source_Modified__c = pairModified.get(String.valueOf(primaryRecordId)),
             Secondary_Source_Modified__c = pairModified.get(String.valueOf(secondaryRecordId)),
-            Merging_Object__c = sObjectApiName
+            Record_Object__c = sObjectApiName
         );
         insert item;
 
@@ -805,7 +921,7 @@ public with sharing class BulkMergeController {
                     Merged_Record_JSON__c = jsonPayload.mergedJson,
                     Primary_Source_Modified__c = pairModified.get(String.valueOf(primaryId)),
                     Secondary_Source_Modified__c = pairModified.get(String.valueOf(secondaryId)),
-                    Merging_Object__c = sObjectApiName
+                    Record_Object__c = sObjectApiName
                 );
                 insert item;
                 out.successCount++;
@@ -1277,5 +1393,12 @@ public with sharing class BulkMergeController {
         public Integer failureCount { get; set; }
         @AuraEnabled
         public List<String> errors { get; set; }
+    }
+
+    public class MergeItemStatusCountRow {
+        @AuraEnabled
+        public String status { get; set; }
+        @AuraEnabled
+        public Integer itemCount { get; set; }
     }
 }

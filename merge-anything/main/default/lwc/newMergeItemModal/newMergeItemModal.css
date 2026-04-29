@@ -1,0 +1,41 @@
+/* Row: radio | [label | divider | value] — label and value vertically centered; divider full row height */
+.field-merge-value-row {
+    display: flex;
+    flex-direction: row;
+    align-items: stretch;
+    flex: 1;
+    min-width: 0;
+    min-height: 2.75rem;
+}
+
+.field-merge-value-row__label {
+    display: flex;
+    align-items: center;
+    flex: 0 1 auto;
+    max-width: 42%;
+    padding-right: var(--lwc-spacingXSmall, 0.5rem);
+}
+
+.field-merge-value-row__divider {
+    flex: 0 0 1px;
+    align-self: stretch;
+    background-color: var(--slds-g-color-border-base-1, var(--lwc-colorBorder, #c9c9c9));
+    margin: 0 var(--lwc-spacingXxSmall, 0.25rem);
+}
+
+.field-merge-value-row__value {
+    display: flex;
+    align-items: center;
+    flex: 1 1 0;
+    min-width: 0;
+    padding-left: var(--lwc-spacingXSmall, 0.5rem);
+}
+
+.field-merge-value-row__value span {
+    word-break: break-word;
+}
+
+/* Center primary vs secondary columns when one side is taller */
+.field-merge-field-row {
+    align-items: center;
+}

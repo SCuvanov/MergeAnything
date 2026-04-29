@@ -41,7 +41,7 @@ public class MergeItemSelector {
                 Secondary_Source_Modified__c,
                 Status__c,
                 Merge_Error__c,
-                Merging_Object__c,
+                Record_Object__c,
                 Attempt_Count__c
             FROM Merge_Item__c
             WHERE Id IN :mergeItemIds
@@ -75,7 +75,7 @@ public class MergeItemSelector {
                 Secondary_Source_Modified__c,
                 Status__c,
                 Merge_Error__c,
-                Merging_Object__c,
+                Record_Object__c,
                 Attempt_Count__c
             FROM Merge_Item__c
             WHERE Merge_Job__c = :mergeJobId
@@ -108,7 +108,7 @@ public class MergeItemSelector {
                 Secondary_Source_Modified__c,
                 Status__c,
                 Merge_Error__c,
-                Merging_Object__c,
+                Record_Object__c,
                 Attempt_Count__c
             FROM Merge_Item__c
             WHERE Merge_Job__c = :mergeJobId AND Status__c != 'Completed'

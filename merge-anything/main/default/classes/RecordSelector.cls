@@ -465,12 +465,32 @@ public with sharing class RecordSelector {
 
         Schema.DisplayType displayType = dfr.getType();
 
-        if (displayType == Schema.DisplayType.DATE) {
-            return ((Date) raw).format();
+        // JSON.deserializeUntyped stores dates/times as Strings; live SObject.get() returns typed values.
+        if (
+            displayType == Schema.DisplayType.DATE ||
+            displayType == Schema.DisplayType.DATETIME ||
+            displayType == Schema.DisplayType.TIME
+        ) {
+            try {
+                Object coerced = coerceMergeValueForUpdate(raw, dfr);
+                if (coerced == null) {
+                    return '';
+                }
+                if (displayType == Schema.DisplayType.DATE && coerced instanceof Date) {
+                    return ((Date) coerced).format();
+                }
+                if (displayType == Schema.DisplayType.DATETIME && coerced instanceof Datetime) {
+                    return ((Datetime) coerced).format();
+                }
+                if (displayType == Schema.DisplayType.TIME && coerced instanceof Time) {
+                    return String.valueOf(coerced);
+                }
+            } catch (Exception e) {
+                // Unparseable snapshot value — show raw string
+            }
+            return String.valueOf(raw);
         }
-        if (displayType == Schema.DisplayType.DATETIME) {
-            return ((Datetime) raw).format();
-        }
+
         return String.valueOf(raw);
     }
 

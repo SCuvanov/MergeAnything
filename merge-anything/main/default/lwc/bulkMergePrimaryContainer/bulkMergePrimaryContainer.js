@@ -19,15 +19,24 @@ const IN_PROGRESS_MERGE_ITEMS = 'in_progress_merge_items';
 const COMPLETED_MERGE_ITEMS = 'completed_merge_items';
 const FAILED_MERGE_ITEMS = 'failed_merge_items';
 const SUCCESS = 'success';
+const ERROR = 'error';
 
 //EVENTS
 const MERGE_JOB_CREATED_EVENT = 'mergejobcreated';
 const MERGE_JOB_SELECTED_EVENT = 'mergejobselected';
+const MERGE_ITEMS_INVALIDATED_EVENT = 'mergeitemsinvalidated';
 
 //FIELDS
 import ID_FIELD from '@salesforce/schema/Merge_Job__c.Id';
 import NAME_FIELD from '@salesforce/schema/Merge_Job__c.Name';
 import STATUS_FIELD from '@salesforce/schema/Merge_Job__c.Status__c';
+
+function apexErrorMessage(error) {
+    if (Array.isArray(error?.body)) {
+        return error.body.map((e) => e.message).join(', ');
+    }
+    return error?.body?.message || error?.message || 'Unknown error';
+}
 
 export default class BulkMergePrimaryContainer extends LightningElement {
     @api recordId;
@@ -120,6 +129,15 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         return this.hideNewMergeItemButton;
     }
 
+    get itemFiltersResetDisabled() {
+        return !(this._itemObjectFilter || '').trim() && !this._itemErrorsOnly;
+    }
+
+    handleResetItemFilters() {
+        this._itemObjectFilter = '';
+        this._itemErrorsOnly = false;
+    }
+
     handleMergeOption(event) {
         this._mergeOption = event.detail.value;
         this.toggleMergeOptionView(this._mergeOption);
@@ -147,9 +165,16 @@ export default class BulkMergePrimaryContainer extends LightningElement {
                 ],
                 'success'
             );
+        } else if (result.status === ERROR) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Could not create merge job',
+                    message: apexErrorMessage(result.error),
+                    variant: 'error',
+                    mode: 'sticky',
+                })
+            );
         }
-
-        //TODO: HANDLE ERROR
     }
 
     async handleNewMergeItem() {
@@ -181,9 +206,8 @@ export default class BulkMergePrimaryContainer extends LightningElement {
             if (mergeItemList) {
                 mergeItemList.refreshList();
             }
+            this.dispatchMergeItemsInvalidated();
         }
-
-        //TODO: HANDLE ERROR
     }
 
     async handleBulkImportCsv() {
@@ -201,6 +225,7 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         if (mergeItemList) {
             await mergeItemList.refreshList();
         }
+        this.dispatchMergeItemsInvalidated();
     }
 
     handleItemObjectFilterInput(event) {
@@ -243,6 +268,10 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         this.dispatchMergeJobEvent(event.detail, MERGE_JOB_SELECTED_EVENT);
     }
 
+    forwardMergeItemsInvalidated() {
+        this.dispatchMergeItemsInvalidated();
+    }
+
     toggleMergeOptionView(value) {
         if (value === MERGE_JOBS) {
             this._mergeView = ALL_MERGE_JOBS;
@@ -260,6 +289,15 @@ export default class BulkMergePrimaryContainer extends LightningElement {
             detail: mergeJobId
         });
         this.dispatchEvent(mergeJobEvent);
+    }
+
+    dispatchMergeItemsInvalidated() {
+        this.dispatchEvent(
+            new CustomEvent(MERGE_ITEMS_INVALIDATED_EVENT, {
+                bubbles: true,
+                composed: true,
+            })
+        );
     }
 
     showToastEvent(title, message, messageData, variant) {

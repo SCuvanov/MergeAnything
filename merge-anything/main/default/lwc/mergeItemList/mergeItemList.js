@@ -3,6 +3,7 @@ import { refreshApex } from '@salesforce/apex';
 import { getRecord, getFieldValue, getRecordNotifyChange } from 'lightning/uiRecordApi';
 import getMergeItemsByMergeJobId from '@salesforce/apex/BulkMergeController.getMergeItemsByMergeJobId';
 import rollbackMergeItem from '@salesforce/apex/BulkMergeController.rollbackMergeItem';
+import deleteMergeItem from '@salesforce/apex/BulkMergeController.deleteMergeItem';
 import MergeConfirmationModal from 'c/mergeConfirmationModal';
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 
@@ -25,6 +26,11 @@ const BASE_COLUMNS = [
         },
     },
     {
+        label: 'Record Object',
+        fieldName: 'Record_Object__c',
+        type: 'text',
+    },
+    {
         label: 'Primary Record',
         fieldName: 'Primary_Record_Link__c',
         type: 'url',
@@ -43,18 +49,6 @@ const BASE_COLUMNS = [
         },
     },
     { label: 'Status', fieldName: 'Status__c' },
-    {
-        label: 'Merging object',
-        fieldName: 'Merging_Object__c',
-        type: 'text',
-    },
-    {
-        label: 'Attempts',
-        fieldName: 'Attempt_Count__c',
-        type: 'number',
-        cellAttributes: { alignment: 'left' },
-    },
-    { label: 'Merge Error', fieldName: 'Merge_Error__c', wrapText: true },
     { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' },
 ];
 
@@ -86,6 +80,7 @@ export default class MergeItemList extends LightningElement {
     _error;
     _mergeJobCompleted = false;
     _mergeJobAllowsItemRollback = false;
+    _mergeJobInProgress = false;
     _tableColumns;
     _itemObjectFilter = '';
     _itemErrorsOnly = false;
@@ -102,7 +97,7 @@ export default class MergeItemList extends LightningElement {
                 type: 'action',
                 typeAttributes: {
                     rowActions: boundRowActions,
-                    menuAlignment: 'right',
+                    menuAlignment: 'auto',
                 },
             },
         ];
@@ -116,11 +111,13 @@ export default class MergeItemList extends LightningElement {
         if (!data) {
             this._mergeJobCompleted = false;
             this._mergeJobAllowsItemRollback = false;
+            this._mergeJobInProgress = false;
             return;
         }
         const status = getFieldValue(data, MERGE_JOB_STATUS_FIELD);
         this._mergeJobCompleted = status === 'Completed';
         this._mergeJobAllowsItemRollback = status === 'Completed' || status === 'Failed';
+        this._mergeJobInProgress = status === 'In Progress';
     }
 
     get showNoMergeJob() {
@@ -160,11 +157,59 @@ export default class MergeItemList extends LightningElement {
         if (this._mergeJobAllowsItemRollback && row.Status__c === 'Completed') {
             actions.push({ label: 'Rollback', name: 'rollback' });
         }
+        if (!this._mergeJobInProgress && row.Status__c !== 'Completed') {
+            actions.push({ label: 'Delete', name: 'delete', iconName: 'utility:delete' });
+        }
         doneCallback(actions);
+    }
+
+    dispatchMergeItemsInvalidated() {
+        this.dispatchEvent(
+            new CustomEvent('mergeitemsinvalidated', {
+                bubbles: true,
+                composed: true,
+            }),
+        );
     }
 
     async handleRowAction(event) {
         const { action, row } = event.detail;
+        if (action.name === 'delete') {
+            const confirmed = await MergeConfirmationModal.open({
+                size: 'small',
+                headerLabel: 'Delete merge item?',
+                bodyMessage: `Permanently delete merge item "${row.Name}"? This removes the line only; it does not merge or roll back records.`,
+            });
+            if (!confirmed) {
+                return;
+            }
+            try {
+                await deleteMergeItem({ mergeItemId: row.Id });
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Merge item deleted',
+                        message: 'The merge item was removed.',
+                        variant: 'success',
+                    }),
+                );
+                await this.refreshList();
+                this.dispatchMergeItemsInvalidated();
+                if (this._recordId) {
+                    getRecordNotifyChange([{ recordId: this._recordId }]);
+                }
+            } catch (error) {
+                this.dispatchEvent(
+                    new ShowToastEvent({
+                        title: 'Delete failed',
+                        message: apexErrorMessage(error),
+                        variant: 'error',
+                        mode: 'sticky',
+                    }),
+                );
+            }
+            return;
+        }
+
         if (action.name !== 'rollback') {
             return;
         }
@@ -188,6 +233,7 @@ export default class MergeItemList extends LightningElement {
                 })
             );
             await this.refreshList();
+            this.dispatchMergeItemsInvalidated();
             if (this._recordId) {
                 getRecordNotifyChange([{ recordId: this._recordId }]);
             }
@@ -218,6 +264,7 @@ export default class MergeItemList extends LightningElement {
             this._error = undefined;
             this._mergeJobCompleted = false;
             this._mergeJobAllowsItemRollback = false;
+            this._mergeJobInProgress = false;
         } else {
             this._itemsLoadComplete = false;
         }
@@ -312,7 +359,7 @@ export default class MergeItemList extends LightningElement {
         const q = (this._itemObjectFilter || '').trim().toLowerCase();
         if (q) {
             this._filteredMergeItems = this._filteredMergeItems.filter((row) =>
-                (row.Merging_Object__c || '').toLowerCase().includes(q)
+                (row.Record_Object__c || '').toLowerCase().includes(q)
             );
         }
         if (this._itemErrorsOnly) {

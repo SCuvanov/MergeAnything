@@ -20,34 +20,49 @@
       </div>
 
       <template lwc:if={_mergeJob}>
-        <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
-          <lightning-combobox name="merge_views" label="Show Me" value={_mergeView} placeholder="Select View"
-            options={_mergeViews} onchange={handleMergeView}>
-          </lightning-combobox>
-        </div>
-
         <template lwc:if={showMergeJobListSection}>
-          <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
+          <div class="slds-m-top_medium">
             <c-merge-job-list record-id={recordId} merge-view={_mergeView}
-              onmergejobselected={handleMergeJobSelected}></c-merge-job-list>
+              onmergejobselected={handleMergeJobSelected} onmergeitemsinvalidated={forwardMergeItemsInvalidated}>
+              <lightning-combobox slot="mergeViewPicker" name="merge_views" label="Show Me" value={_mergeView}
+                placeholder="Select View" options={_mergeViews} onchange={handleMergeView}>
+              </lightning-combobox>
+            </c-merge-job-list>
           </div>
         </template>
         <template lwc:if={showMergeItemListSection}>
-          <div class="slds-m-top_medium slds-grid slds-gutters slds-wrap slds-grid_vertical-align-end">
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
-              <lightning-input
-                label="Filter by merging object (contains)"
-                value={_itemObjectFilter}
-                onchange={handleItemObjectFilterInput}
-              ></lightning-input>
+          <div class="slds-m-top_medium item-filter-toolbar">
+            <div class="item-filter-toolbar__showme">
+              <lightning-combobox name="merge_views" label="Show Me" value={_mergeView} placeholder="Select View"
+                options={_mergeViews} onchange={handleMergeView}>
+              </lightning-combobox>
             </div>
-            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-align-bottom">
-              <lightning-input
-                type="checkbox"
-                label="Errors only (failed status or merge error text)"
-                checked={_itemErrorsOnly}
-                onchange={handleItemErrorsOnlyChange}
-              ></lightning-input>
+            <div class="slds-grid slds-wrap slds-grid_vertical-align-end item-filter-toolbar__filters">
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12">
+                <lightning-input
+                  label="Filter by record object (contains)"
+                  value={_itemObjectFilter}
+                  onchange={handleItemObjectFilterInput}
+                ></lightning-input>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-align-bottom">
+                <lightning-input
+                  type="checkbox"
+                  label="Errors only (failed status or merge error text)"
+                  checked={_itemErrorsOnly}
+                  onchange={handleItemErrorsOnlyChange}
+                ></lightning-input>
+              </div>
+              <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-align-bottom">
+                <lightning-button
+                  variant="neutral"
+                  label="Reset filters"
+                  title="Clear object filter and errors-only"
+                  icon-name="utility:clear"
+                  onclick={handleResetItemFilters}
+                  disabled={itemFiltersResetDisabled}
+                ></lightning-button>
+              </div>
             </div>
           </div>
           <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
@@ -56,6 +71,7 @@
               merge-view={_mergeView}
               item-object-filter={_itemObjectFilter}
               item-errors-only={_itemErrorsOnly}
+              onmergeitemsinvalidated={forwardMergeItemsInvalidated}
             ></c-merge-item-list>
           </div>
         </template>

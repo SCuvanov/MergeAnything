@@ -25,7 +25,7 @@
             </layoutItems>
             <layoutItems>
                 <behavior>Readonly</behavior>
-                <field>Merging_Object__c</field>
+                <field>Record_Object__c</field>
             </layoutItems>
             <layoutItems>
                 <behavior>Readonly</behavior>

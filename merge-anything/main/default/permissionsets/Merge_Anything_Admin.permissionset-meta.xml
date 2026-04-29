@@ -27,7 +27,7 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
-        <field>Merge_Item__c.Merging_Object__c</field>
+        <field>Merge_Item__c.Record_Object__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

@@ -8,6 +8,7 @@ import rollbackMergeJob from '@salesforce/apex/BulkMergeController.rollbackMerge
 import validateMergeJob from '@salesforce/apex/BulkMergeController.validateMergeJob';
 import getMergeItemCountByMergeJobId from '@salesforce/apex/BulkMergeController.getMergeItemCountByMergeJobId';
 import getCompletedMergeItemCountByMergeJobId from '@salesforce/apex/BulkMergeController.getCompletedMergeItemCountByMergeJobId';
+import getMergeItemStatusCountsByMergeJobId from '@salesforce/apex/BulkMergeController.getMergeItemStatusCountsByMergeJobId';
 import MergeConfirmationModal from 'c/mergeConfirmationModal';
 import MergePreviewModal from 'c/mergePreviewModal';
 import MergeValidationResultsModal from 'c/mergeValidationResultsModal';
@@ -25,12 +26,27 @@ function apexErrorMessage(error) {
     return error?.body?.message || error?.message || 'Unknown error';
 }
 
+const STATUS_COLORS = {
+    Pending: '#fe9339',
+    'In Progress': '#1b96ff',
+    Completed: '#2e844a',
+    Failed: '#ba0517',
+};
+
+function statusToColor(status) {
+    if (!status) {
+        return '#706e6b';
+    }
+    return STATUS_COLORS[status] || '#706e6b';
+}
+
 export default class BulkMergeSecondaryContainer extends LightningElement {
     @api recordId;
     _mergeJob;
     _executing = false;
     _wiredMergeItemCount;
     _wiredCompletedMergeItemCount;
+    _wiredMergeItemStatusCounts;
 
     @wire(getRecord, {
         recordId: '$recordId',
@@ -59,6 +75,11 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
         this._wiredCompletedMergeItemCount = result;
     }
 
+    @wire(getMergeItemStatusCountsByMergeJobId, { mergeJobId: '$recordId' })
+    wiredMergeItemStatusCounts(result) {
+        this._wiredMergeItemStatusCounts = result;
+    }
+
     get mergeItemCountDisplay() {
         if (!this.recordId || !this._wiredMergeItemCount) {
             return '';
@@ -85,6 +106,7 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
         return data;
     }
 
+    @api
     refreshMergeItemCount() {
         const promises = [];
         if (this._wiredMergeItemCount) {
@@ -93,7 +115,96 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
         if (this._wiredCompletedMergeItemCount) {
             promises.push(refreshApex(this._wiredCompletedMergeItemCount));
         }
+        if (this._wiredMergeItemStatusCounts) {
+            promises.push(refreshApex(this._wiredMergeItemStatusCounts));
+        }
         return promises.length ? Promise.all(promises) : Promise.resolve();
+    }
+
+    get mergeItemStatusRows() {
+        if (!this.recordId || !this._wiredMergeItemStatusCounts) {
+            return [];
+        }
+        const { data, error } = this._wiredMergeItemStatusCounts;
+        if (error || data == null) {
+            return [];
+        }
+        return data;
+    }
+
+    get mergeItemStatusTotalCount() {
+        return this.mergeItemStatusRows.reduce((sum, row) => sum + (row.itemCount || 0), 0);
+    }
+
+    get showMergeItemStatusLoading() {
+        return (
+            !!this.recordId &&
+            this._wiredMergeItemStatusCounts &&
+            !this._wiredMergeItemStatusCounts.data &&
+            !this._wiredMergeItemStatusCounts.error
+        );
+    }
+
+    get showMergeItemStatusEmpty() {
+        const w = this._wiredMergeItemStatusCounts;
+        return (
+            !!this.recordId &&
+            w &&
+            !w.error &&
+            w.data !== undefined &&
+            this.mergeItemStatusTotalCount === 0
+        );
+    }
+
+    get mergeItemStatusChartErrorMessage() {
+        const w = this._wiredMergeItemStatusCounts;
+        if (!w?.error) {
+            return '';
+        }
+        return apexErrorMessage(w.error);
+    }
+
+    get mergeItemStatusPieStyle() {
+        const rows = this.mergeItemStatusRows;
+        const total = rows.reduce((sum, row) => sum + (row.itemCount || 0), 0);
+        if (total === 0) {
+            return 'background-color: var(--lwc-colorBackgroundAlt, #f3f3f3);';
+        }
+        let acc = 0;
+        const parts = [];
+        for (const row of rows) {
+            const n = row.itemCount || 0;
+            if (n <= 0) {
+                continue;
+            }
+            const startPct = (acc / total) * 100;
+            acc += n;
+            const endPct = (acc / total) * 100;
+            parts.push(`${statusToColor(row.status)} ${startPct}% ${endPct}%`);
+        }
+        if (parts.length === 0) {
+            return 'background-color: var(--lwc-colorBackgroundAlt, #f3f3f3);';
+        }
+        return `background-image: conic-gradient(${parts.join(', ')});`;
+    }
+
+    get mergeItemStatusPieTitle() {
+        const rows = this.mergeItemStatusRows;
+        const total = rows.reduce((sum, row) => sum + (row.itemCount || 0), 0);
+        return `${total} merge item${total === 1 ? '' : 's'} total`;
+    }
+
+    get mergeItemStatusLegendRows() {
+        return this.mergeItemStatusRows.map((row, idx) => {
+            const n = row.itemCount || 0;
+            const st = row.status || '';
+            return {
+                rowKey: `legend-${idx}-${st}`,
+                status: st,
+                legendLabel: `${st}: ${n}`,
+                swatchStyle: `background-color: ${statusToColor(st)}`,
+            };
+        });
     }
 
     get _mergeJobId() {
@@ -110,6 +221,24 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
 
     get _mergeJobStatus() {
         return getFieldValue(this._mergeJob, STATUS_FIELD);
+    }
+
+    get mergeJobStatusTextClass() {
+        const base = 'slds-text-heading_small slds-m-top_xx-small';
+        const s = this._mergeJobStatus;
+        if (s === 'Completed') {
+            return `${base} slds-text-color_success`;
+        }
+        if (s === 'Failed') {
+            return `${base} slds-text-color_error`;
+        }
+        if (s === 'In Progress') {
+            return `${base} slds-text-color_default`;
+        }
+        if (s === 'Pending') {
+            return `${base} slds-text-color_weak`;
+        }
+        return base;
     }
 
     get isJobCompleted() {
