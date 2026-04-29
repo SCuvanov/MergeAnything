@@ -27,6 +27,16 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Merge_Item__c.Merging_Object__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>false</editable>
+        <field>Merge_Item__c.Attempt_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Merge_Item__c.Primary_Record_Id__c</field>
         <readable>true</readable>
     </fieldPermissions>
@@ -81,6 +91,11 @@
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
+        <editable>true</editable>
+        <field>Merge_Job__c.Async_Last_Error__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>false</editable>
         <field>Merge_Job__c.Link__c</field>
         <readable>true</readable>
@@ -92,6 +107,16 @@
     </fieldPermissions>
     <hasActivationRequired>false</hasActivationRequired>
     <label>Merge Anything Admin</label>
+    <objectPermissions>
+        <allowCreate>true</allowCreate>
+        <allowDelete>true</allowDelete>
+        <allowEdit>true</allowEdit>
+        <allowRead>true</allowRead>
+        <modifyAllRecords>true</modifyAllRecords>
+        <object>Merge_Field_Template__c</object>
+        <viewAllFields>true</viewAllFields>
+        <viewAllRecords>true</viewAllRecords>
+    </objectPermissions>
     <objectPermissions>
         <allowCreate>true</allowCreate>
         <allowDelete>true</allowDelete>
@@ -114,6 +139,10 @@
     </objectPermissions>
     <tabSettings>
         <tab>Bulk_Merge</tab>
+        <visibility>Visible</visibility>
+    </tabSettings>
+    <tabSettings>
+        <tab>Merge_Field_Template__c</tab>
         <visibility>Visible</visibility>
     </tabSettings>
     <tabSettings>

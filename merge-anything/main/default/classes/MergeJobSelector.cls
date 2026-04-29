@@ -74,13 +74,13 @@ public class MergeJobSelector {
      */
     public List<Merge_Job__c> getAllMergeJobs() {
         List<Merge_Job__c> mergeJobs = [
-            SELECT Id, CreatedDate, Name, Link__c, Status__c
+            SELECT Id, CreatedDate, Name, Link__c, Status__c, CreatedById, CreatedBy.Name
             FROM Merge_Job__c
             ORDER BY CreatedDate DESC
         ];
 
         if (mergeJobs == null || mergeJobs.isEmpty()) {
-            return null;
+            return new List<Merge_Job__c>();
         }
 
         return mergeJobs;

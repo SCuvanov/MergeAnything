@@ -40,7 +40,9 @@ public class MergeItemSelector {
                 Primary_Source_Modified__c,
                 Secondary_Source_Modified__c,
                 Status__c,
-                Merge_Error__c
+                Merge_Error__c,
+                Merging_Object__c,
+                Attempt_Count__c
             FROM Merge_Item__c
             WHERE Id IN :mergeItemIds
         ];
@@ -72,9 +74,57 @@ public class MergeItemSelector {
                 Primary_Source_Modified__c,
                 Secondary_Source_Modified__c,
                 Status__c,
-                Merge_Error__c
+                Merge_Error__c,
+                Merging_Object__c,
+                Attempt_Count__c
             FROM Merge_Item__c
             WHERE Merge_Job__c = :mergeJobId
+        ];
+    }
+
+    /**
+     * @description Oldest non-completed merge items for chunked background processing.
+     */
+    public List<Merge_Item__c> getNonCompletedMergeItemsChunk(Id mergeJobId, Integer rowLimit) {
+        Integer lim = rowLimit == null || rowLimit < 1 ? 15 : Math.min(rowLimit, 50);
+        return [
+            SELECT
+                Id,
+                CreatedDate,
+                Name,
+                Link__c,
+                Merge_Job__c,
+                Field_Selections_JSON__c,
+                Merged_Record_JSON__c,
+                Primary_Record_Id__c,
+                Primary_Record_Name__c,
+                Primary_Record_Link__c,
+                Primary_Record_JSON__c,
+                Secondary_Record_Id__c,
+                Secondary_Record_Name__c,
+                Secondary_Record_Link__c,
+                Secondary_Record_JSON__c,
+                Primary_Source_Modified__c,
+                Secondary_Source_Modified__c,
+                Status__c,
+                Merge_Error__c,
+                Merging_Object__c,
+                Attempt_Count__c
+            FROM Merge_Item__c
+            WHERE Merge_Job__c = :mergeJobId AND Status__c != 'Completed'
+            ORDER BY CreatedDate ASC
+            LIMIT :lim
+        ];
+    }
+
+    public Integer countNonCompletedMergeItems(Id mergeJobId) {
+        if (mergeJobId == null) {
+            return 0;
+        }
+        return [
+            SELECT COUNT()
+            FROM Merge_Item__c
+            WHERE Merge_Job__c = :mergeJobId AND Status__c != 'Completed'
         ];
     }
 }

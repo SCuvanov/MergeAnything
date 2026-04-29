@@ -4,6 +4,7 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import createMergeJob from '@salesforce/apex/BulkMergeController.createMergeJob';
 import NewMergeJobModal from 'c/newMergeJobModal';
 import NewMergeItemModal from 'c/newMergeItemModal';
+import BulkMergeItemsModal from 'c/bulkMergeItemsModal';
 
 const MERGE_JOBS = 'merge_jobs';
 const MERGE_ITEMS = 'merge_items';
@@ -34,6 +35,8 @@ export default class BulkMergePrimaryContainer extends LightningElement {
     _mergeOption;
     _mergeView;
     _showMergeJobList;
+    _itemObjectFilter = '';
+    _itemErrorsOnly = false;
 
     constructor() {
         super();
@@ -113,6 +116,10 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         return this._showMergeJobList || this.isMergeJobCompleted;
     }
 
+    get hideBulkImportButton() {
+        return this.hideNewMergeItemButton;
+    }
+
     handleMergeOption(event) {
         this._mergeOption = event.detail.value;
         this.toggleMergeOptionView(this._mergeOption);
@@ -179,6 +186,31 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         //TODO: HANDLE ERROR
     }
 
+    async handleBulkImportCsv() {
+        if (this.isMergeJobCompleted || !this.recordId) {
+            return;
+        }
+        const result = await BulkMergeItemsModal.open({
+            size: 'large',
+            mergeJobId: this.recordId,
+        });
+        if (!result || result.status !== SUCCESS) {
+            return;
+        }
+        const mergeItemList = this.template.querySelector('c-merge-item-list');
+        if (mergeItemList) {
+            await mergeItemList.refreshList();
+        }
+    }
+
+    handleItemObjectFilterInput(event) {
+        this._itemObjectFilter = event.target.value;
+    }
+
+    handleItemErrorsOnlyChange(event) {
+        this._itemErrorsOnly = event.target.checked;
+    }
+
     handleMergeView(event) {
         this._mergeView = event.detail.value;
     }
@@ -218,6 +250,8 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         } else {
             this._mergeView = ALL_MERGE_ITEMS;
             this._showMergeJobList = false;
+            this._itemObjectFilter = '';
+            this._itemErrorsOnly = false;
         }
     }
 

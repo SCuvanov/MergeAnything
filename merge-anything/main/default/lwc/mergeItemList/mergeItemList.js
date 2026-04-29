@@ -43,6 +43,17 @@ const BASE_COLUMNS = [
         },
     },
     { label: 'Status', fieldName: 'Status__c' },
+    {
+        label: 'Merging object',
+        fieldName: 'Merging_Object__c',
+        type: 'text',
+    },
+    {
+        label: 'Attempts',
+        fieldName: 'Attempt_Count__c',
+        type: 'number',
+        cellAttributes: { alignment: 'left' },
+    },
     { label: 'Merge Error', fieldName: 'Merge_Error__c', wrapText: true },
     { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' },
 ];
@@ -76,6 +87,8 @@ export default class MergeItemList extends LightningElement {
     _mergeJobCompleted = false;
     _mergeJobAllowsItemRollback = false;
     _tableColumns;
+    _itemObjectFilter = '';
+    _itemErrorsOnly = false;
 
     constructor() {
         super();
@@ -222,6 +235,29 @@ export default class MergeItemList extends LightningElement {
         this.filterMergeItems();
     }
 
+    @api
+    get itemObjectFilter() {
+        return this._itemObjectFilter;
+    }
+
+    set itemObjectFilter(value) {
+        this.setAttribute('item-object-filter', value);
+        this._itemObjectFilter = value ?? '';
+        this.filterMergeItems();
+    }
+
+    @api
+    get itemErrorsOnly() {
+        return this._itemErrorsOnly;
+    }
+
+    set itemErrorsOnly(value) {
+        const flag = value === true || value === 'true';
+        this.setAttribute('item-errors-only', flag);
+        this._itemErrorsOnly = flag;
+        this.filterMergeItems();
+    }
+
     @wire(getMergeItemsByMergeJobId, { mergeJobId: '$_recordId' })
     wireMergesItems(result) {
         this._wiredMergeItems = result;
@@ -271,6 +307,19 @@ export default class MergeItemList extends LightningElement {
             this._filteredMergeItems = this._mergeItems.filter((merge) => merge.Status__c === 'Failed');
         } else {
             this._filteredMergeItems = this._mergeItems;
+        }
+
+        const q = (this._itemObjectFilter || '').trim().toLowerCase();
+        if (q) {
+            this._filteredMergeItems = this._filteredMergeItems.filter((row) =>
+                (row.Merging_Object__c || '').toLowerCase().includes(q)
+            );
+        }
+        if (this._itemErrorsOnly) {
+            this._filteredMergeItems = this._filteredMergeItems.filter((row) => {
+                const err = (row.Merge_Error__c || '').trim();
+                return err.length > 0 || row.Status__c === 'Failed';
+            });
         }
     }
 }

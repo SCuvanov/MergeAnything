@@ -3,6 +3,7 @@ import { getRecord, getRecordNotifyChange, getFieldValue } from 'lightning/uiRec
 import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import { refreshApex } from '@salesforce/apex';
 import executeMergeJob from '@salesforce/apex/BulkMergeController.executeMergeJob';
+import startMergeJobInBackground from '@salesforce/apex/BulkMergeController.startMergeJobInBackground';
 import rollbackMergeJob from '@salesforce/apex/BulkMergeController.rollbackMergeJob';
 import validateMergeJob from '@salesforce/apex/BulkMergeController.validateMergeJob';
 import getMergeItemCountByMergeJobId from '@salesforce/apex/BulkMergeController.getMergeItemCountByMergeJobId';
@@ -115,6 +116,14 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
         return this._mergeJobStatus === 'Completed';
     }
 
+    get isJobInProgress() {
+        return this._mergeJobStatus === 'In Progress';
+    }
+
+    get startButtonsDisabled() {
+        return this._executing || this.isJobInProgress;
+    }
+
     get showRunActions() {
         return this._mergeJob && !this.isJobCompleted;
     }
@@ -180,7 +189,7 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
     }
 
     async handleStart() {
-        if (!this.recordId || this._executing || this.isJobCompleted) {
+        if (!this.recordId || this._executing || this.isJobCompleted || this.isJobInProgress) {
             return;
         }
 
@@ -219,6 +228,48 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Merge job failed',
+                    message: apexErrorMessage(error),
+                    variant: 'error',
+                    mode: 'sticky',
+                })
+            );
+        } finally {
+            this._executing = false;
+        }
+    }
+
+    async handleStartInBackground() {
+        if (!this.recordId || this._executing || this.isJobCompleted || this.isJobInProgress) {
+            return;
+        }
+
+        const confirmed = await MergeConfirmationModal.open({
+            size: 'small',
+            headerLabel: 'Run merge in the background?',
+            bodyMessage:
+                'Pending or failed items will be processed in chunks. You will get an in-app notification when the job finishes. If the run cannot start (for example validation failures), details are saved on the merge job in Async Last Error. Continue?',
+        });
+        if (!confirmed) {
+            return;
+        }
+
+        this._executing = true;
+        try {
+            await startMergeJobInBackground({ mergeJobId: this.recordId });
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Merge queued',
+                    message:
+                        'Background processing has started. Watch for a notification when it completes; check Async Last Error on the job if nothing runs.',
+                    variant: 'success',
+                })
+            );
+            getRecordNotifyChange([{ recordId: this.recordId }]);
+            this.refreshMergeItemCount();
+        } catch (error) {
+            this.dispatchEvent(
+                new ShowToastEvent({
+                    title: 'Could not queue merge',
                     message: apexErrorMessage(error),
                     variant: 'error',
                     mode: 'sticky',

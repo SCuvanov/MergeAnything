@@ -42,11 +42,15 @@
               icon-name="utility:preview" class="slds-m-left_xx-small" onclick={handlePreview} disabled={_executing}>
             </lightning-button>
             <lightning-button variant="neutral" label="Validate" title="Check concurrency, stale data, and test updates"
-              icon-name="utility:rules" class="slds-m-left_xx-small" onclick={handleValidate} disabled={_executing}>
-            </lightning-button>
+              icon-name="utility:rules" class="slds-m-left_xx-small" onclick={handleValidate}
+              disabled={_executing}></lightning-button>
             <lightning-button variant="brand" label="Start" title="Run merge for pending or failed items"
-              icon-name="utility:play" class="slds-m-left_xx-small" onclick={handleStart} disabled={_executing}>
-            </lightning-button>
+              icon-name="utility:play" class="slds-m-left_xx-small" onclick={handleStart}
+              disabled={startButtonsDisabled}></lightning-button>
+            <lightning-button variant="brand-outline" label="Start in background"
+              title="Queue chunked merge; notification when done"
+              icon-name="utility:clock" class="slds-m-left_xx-small" onclick={handleStartInBackground}
+              disabled={startButtonsDisabled}></lightning-button>
           </template>
           <template lwc:if={showRollbackAction}>
             <lightning-button variant="destructive" label="Rollback" title="Restore primary records and undelete secondaries"

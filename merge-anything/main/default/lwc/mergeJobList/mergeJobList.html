@@ -16,6 +16,34 @@
         </div>
     </template>
     <template lwc:else>
+        <template lwc:if={showJobFilters}>
+            <div class="slds-grid slds-gutters slds-wrap slds-m-bottom_small">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                    <lightning-combobox
+                        label="Created by"
+                        value={_jobCreatedByFilter}
+                        options={creatorFilterOptions}
+                        onchange={handleCreatorFilterChange}
+                    ></lightning-combobox>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                    <lightning-input
+                        type="date"
+                        label="Created on or after"
+                        value={_jobDateFrom}
+                        onchange={handleJobDateFromChange}
+                    ></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12">
+                    <lightning-input
+                        type="date"
+                        label="Created on or before"
+                        value={_jobDateTo}
+                        onchange={handleJobDateToChange}
+                    ></lightning-input>
+                </div>
+            </div>
+        </template>
         <lightning-datatable key-field="Id" data={_filteredMergeJobs} columns={_columns}
             selected-rows={_selectedMergeJob} max-row-selection="1" onrowselection={handleMergeJobSelected}>
         </lightning-datatable>

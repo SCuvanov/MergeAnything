@@ -22,8 +22,19 @@ const _columns = [
         },
     },
     { label: 'Status', fieldName: 'Status__c' },
+    { label: 'Created By', fieldName: '_createdByName' },
     { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' },
 ];
+
+function decorateMergeJobsForDisplay(jobs) {
+    if (!jobs) {
+        return jobs;
+    }
+    return jobs.map((row) => ({
+        ...row,
+        _createdByName: row.CreatedBy?.Name || '',
+    }));
+}
 
 export default class MergeJobList extends LightningElement {
     _recordId;
@@ -35,6 +46,9 @@ export default class MergeJobList extends LightningElement {
     _columns = _columns;
     _jobsLoadComplete = false;
     _error;
+    _jobCreatedByFilter = '';
+    _jobDateFrom = '';
+    _jobDateTo = '';
 
     constructor() {
         super();
@@ -59,10 +73,36 @@ export default class MergeJobList extends LightningElement {
 
     get emptyJobMessage() {
         const total = this._mergeJobs?.length ?? 0;
-        if (this._mergeView === ALL_MERGE_JOBS || total === 0) {
+        const hasRowFilters =
+            !!this._jobCreatedByFilter ||
+            !!this._jobDateFrom ||
+            !!this._jobDateTo;
+        if ((this._mergeView === ALL_MERGE_JOBS && !hasRowFilters) || total === 0) {
             return 'No merge jobs found. Create one with New Merge Job.';
         }
         return 'No merge jobs match the current filter.';
+    }
+
+    get showJobFilters() {
+        return this._jobsLoadComplete && !this._error && (this._mergeJobs?.length ?? 0) > 0;
+    }
+
+    get creatorFilterOptions() {
+        const base = [{ label: 'All', value: '' }];
+        if (!this._mergeJobs?.length) {
+            return base;
+        }
+        const map = new Map();
+        this._mergeJobs.forEach((j) => {
+            const id = j.CreatedById;
+            if (id && !map.has(id)) {
+                map.set(id, j.CreatedBy?.Name || id);
+            }
+        });
+        const rest = [...map.entries()]
+            .map(([value, label]) => ({ label, value }))
+            .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
+        return [...base, ...rest];
     }
 
     @api
@@ -103,7 +143,7 @@ export default class MergeJobList extends LightningElement {
         } else if (data !== undefined) {
             this._jobsLoadComplete = true;
             this._error = undefined;
-            this._mergeJobs = data == null ? [] : data;
+            this._mergeJobs = decorateMergeJobsForDisplay(data == null ? [] : data);
         }
 
         this.filterMerges();
@@ -129,7 +169,44 @@ export default class MergeJobList extends LightningElement {
             this._filteredMergeJobs = this._mergeJobs;
         }
 
+        if (this._jobCreatedByFilter) {
+            this._filteredMergeJobs = this._filteredMergeJobs.filter(
+                (merge) => merge.CreatedById === this._jobCreatedByFilter
+            );
+        }
+        if (this._jobDateFrom) {
+            const fromMs = new Date(this._jobDateFrom).setHours(0, 0, 0, 0);
+            this._filteredMergeJobs = this._filteredMergeJobs.filter((merge) => {
+                const d = merge.CreatedDate != null ? new Date(merge.CreatedDate).getTime() : 0;
+                return d >= fromMs;
+            });
+        }
+        if (this._jobDateTo) {
+            const to = new Date(this._jobDateTo);
+            to.setHours(23, 59, 59, 999);
+            const toMs = to.getTime();
+            this._filteredMergeJobs = this._filteredMergeJobs.filter((merge) => {
+                const d = merge.CreatedDate != null ? new Date(merge.CreatedDate).getTime() : 0;
+                return d <= toMs;
+            });
+        }
+
         this.setSelectedMerge();
+    }
+
+    handleCreatorFilterChange(event) {
+        this._jobCreatedByFilter = event.detail.value || '';
+        this.filterMerges();
+    }
+
+    handleJobDateFromChange(event) {
+        this._jobDateFrom = event.target.value || '';
+        this.filterMerges();
+    }
+
+    handleJobDateToChange(event) {
+        this._jobDateTo = event.target.value || '';
+        this.filterMerges();
     }
 
     setSelectedMerge() {

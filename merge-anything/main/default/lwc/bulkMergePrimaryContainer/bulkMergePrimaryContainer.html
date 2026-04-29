@@ -13,6 +13,9 @@
           <lightning-button data-id="newMergeItemBtn" variant="neutral" label="New Merge Item"
             title="New Merge Item (not available for completed jobs)" icon-name="utility:add"
             onclick={handleNewMergeItem} hidden={hideNewMergeItemButton}></lightning-button>
+          <lightning-button data-id="bulkImportCsvBtn" variant="neutral" label="Bulk add (CSV)"
+            title="Create many merge items from Id pairs (one pair per line)" icon-name="utility:upload"
+            onclick={handleBulkImportCsv} hidden={hideBulkImportButton}></lightning-button>
         </div>
       </div>
 
@@ -30,8 +33,30 @@
           </div>
         </template>
         <template lwc:if={showMergeItemListSection}>
+          <div class="slds-m-top_medium slds-grid slds-gutters slds-wrap slds-grid_vertical-align-end">
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2">
+              <lightning-input
+                label="Filter by merging object (contains)"
+                value={_itemObjectFilter}
+                onchange={handleItemObjectFilterInput}
+              ></lightning-input>
+            </div>
+            <div class="slds-col slds-size_1-of-1 slds-medium-size_1-of-2 slds-align-bottom">
+              <lightning-input
+                type="checkbox"
+                label="Errors only (failed status or merge error text)"
+                checked={_itemErrorsOnly}
+                onchange={handleItemErrorsOnlyChange}
+              ></lightning-input>
+            </div>
+          </div>
           <div class="slds-m-top_medium slds-grid slds-grid_align-spread slds-grid_vertical-align-end">
-            <c-merge-item-list record-id={recordId} merge-view={_mergeView}></c-merge-item-list>
+            <c-merge-item-list
+              record-id={recordId}
+              merge-view={_mergeView}
+              item-object-filter={_itemObjectFilter}
+              item-errors-only={_itemErrorsOnly}
+            ></c-merge-item-list>
           </div>
         </template>
       </template>

@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customNotifTypeName>Merge_Job_Finished</customNotifTypeName>
+    <description>Notifies the user when a background merge job finishes.</description>
+    <desktop>true</desktop>
+    <masterLabel>Merge Job Finished</masterLabel>
+    <mobile>true</mobile>
+    <slack>false</slack>
+</CustomNotificationType>

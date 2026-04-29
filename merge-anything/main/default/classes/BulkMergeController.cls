@@ -107,7 +107,8 @@ public with sharing class BulkMergeController {
             Secondary_Record_JSON__c = jsonPayload.secondaryJson,
             Merged_Record_JSON__c = jsonPayload.mergedJson,
             Primary_Source_Modified__c = pairModified.get(String.valueOf(primaryRecordId)),
-            Secondary_Source_Modified__c = pairModified.get(String.valueOf(secondaryRecordId))
+            Secondary_Source_Modified__c = pairModified.get(String.valueOf(secondaryRecordId)),
+            Merging_Object__c = sObjectApiName
         );
         insert item;
 
@@ -326,6 +327,92 @@ public with sharing class BulkMergeController {
         return result;
     }
 
+    private class MergeItemProcessResult {
+        Boolean success;
+        String secondaryTypeName;
+        Id secondaryId;
+        String errorLine;
+    }
+
+    /**
+     * @description Shared row-level merge execution (savepoint per item). Used by synchronous job run and async chunks.
+     */
+    private static MergeItemProcessResult processMergeItemRow(Merge_Item__c item, RecordSelector selector) {
+        MergeItemProcessResult res = new MergeItemProcessResult();
+        res.success = false;
+        String itemLabel = item.Name != null ? item.Name : String.valueOf(item.Id);
+        try {
+            if (item.Primary_Record_Id__c == null || item.Secondary_Record_Id__c == null) {
+                throw new AuraHandledException('Merge Item is missing primary or secondary record Id.');
+            }
+
+            Id primaryId = Id.valueOf(item.Primary_Record_Id__c);
+            Id secondaryId = Id.valueOf(item.Secondary_Record_Id__c);
+
+            if (primaryId == secondaryId) {
+                throw new AuraHandledException('Primary and secondary record Ids must be different.');
+            }
+
+            String primaryTypeName = primaryId.getSObjectType().getDescribe().getName();
+            String secondaryTypeName = secondaryId.getSObjectType().getDescribe().getName();
+            if (primaryTypeName != secondaryTypeName) {
+                throw new AuraHandledException('Primary and secondary records must be the same object type.');
+            }
+
+            List<RecordSelector.MergeFieldSelection> selections = selector.parseFieldSelectionsFromJson(
+                item.Field_Selections_JSON__c
+            );
+            if (selections.isEmpty()) {
+                selections = selector.inferFieldSelectionsFromStoredJson(
+                    item.Primary_Record_JSON__c,
+                    item.Secondary_Record_JSON__c,
+                    item.Merged_Record_JSON__c
+                );
+            }
+
+            String mergedJson = selector.buildMergedRecordJson(primaryTypeName, primaryId, secondaryId, selections);
+            if (String.isBlank(mergedJson)) {
+                throw new AuraHandledException(
+                    'Could not rebuild merged JSON; verify both records still exist.'
+                );
+            }
+
+            SObject survivorRow = selector.buildSurvivorUpdateRowFromMergedJson(
+                primaryTypeName,
+                primaryId,
+                mergedJson
+            );
+
+            System.Savepoint sp = Database.setSavepoint();
+            try {
+                update survivorRow;
+
+                Merge_Item__c itemSuccess = new Merge_Item__c(
+                    Id = item.Id,
+                    Merged_Record_JSON__c = mergedJson,
+                    Merge_Error__c = null,
+                    Status__c = 'Completed',
+                    Attempt_Count__c = 0
+                );
+                update itemSuccess;
+
+                res.success = true;
+                res.secondaryTypeName = secondaryTypeName;
+                res.secondaryId = secondaryId;
+            } catch (Exception updateEx) {
+                Database.rollback(sp);
+                String errMsg = mergeFailureMessage(updateEx);
+                failMergeItem(item.Id, errMsg);
+                res.errorLine = itemLabel + ': ' + errMsg;
+            }
+        } catch (Exception ex) {
+            String errMsg = mergeFailureMessage(ex);
+            failMergeItem(item.Id, errMsg);
+            res.errorLine = itemLabel + ': ' + errMsg;
+        }
+        return res;
+    }
+
     /**
      * @description Sets the job to In Progress, then processes each non-Completed merge item: validates input, updates
      *              the surviving primary from merged JSON, updates the merge item to Completed, and queues the
@@ -352,6 +439,11 @@ public with sharing class BulkMergeController {
         }
         if (jobs[0].Status__c == 'Completed') {
             throw new AuraHandledException('This merge job is already completed.');
+        }
+        if ('In Progress'.equals(jobs[0].Status__c)) {
+            throw new AuraHandledException(
+                'This merge job is already in progress. Wait for background processing to finish, then refresh.'
+            );
         }
 
         List<Merge_Item__c> items = MergeItemSelector.getInstance().getMergeItemsByMergeJobId(mergeJobId);
@@ -393,80 +485,16 @@ public with sharing class BulkMergeController {
                 continue;
             }
 
-            String itemLabel = item.Name != null ? item.Name : String.valueOf(item.Id);
-
-            try {
-                if (item.Primary_Record_Id__c == null || item.Secondary_Record_Id__c == null) {
-                    throw new AuraHandledException('Merge Item is missing primary or secondary record Id.');
+            MergeItemProcessResult rowResult = processMergeItemRow(item, selector);
+            if (rowResult.success) {
+                if (!secondaryIdsByType.containsKey(rowResult.secondaryTypeName)) {
+                    secondaryIdsByType.put(rowResult.secondaryTypeName, new Set<Id>());
                 }
-
-                Id primaryId = Id.valueOf(item.Primary_Record_Id__c);
-                Id secondaryId = Id.valueOf(item.Secondary_Record_Id__c);
-
-                if (primaryId == secondaryId) {
-                    throw new AuraHandledException('Primary and secondary record Ids must be different.');
-                }
-
-                String primaryTypeName = primaryId.getSObjectType().getDescribe().getName();
-                String secondaryTypeName = secondaryId.getSObjectType().getDescribe().getName();
-                if (primaryTypeName != secondaryTypeName) {
-                    throw new AuraHandledException('Primary and secondary records must be the same object type.');
-                }
-
-                List<RecordSelector.MergeFieldSelection> selections = selector.parseFieldSelectionsFromJson(
-                    item.Field_Selections_JSON__c
-                );
-                if (selections.isEmpty()) {
-                    selections = selector.inferFieldSelectionsFromStoredJson(
-                        item.Primary_Record_JSON__c,
-                        item.Secondary_Record_JSON__c,
-                        item.Merged_Record_JSON__c
-                    );
-                }
-
-                String mergedJson = selector.buildMergedRecordJson(primaryTypeName, primaryId, secondaryId, selections);
-                if (String.isBlank(mergedJson)) {
-                    throw new AuraHandledException(
-                        'Could not rebuild merged JSON; verify both records still exist.'
-                    );
-                }
-
-                SObject survivorRow = selector.buildSurvivorUpdateRowFromMergedJson(
-                    primaryTypeName,
-                    primaryId,
-                    mergedJson
-                );
-
-                System.Savepoint sp = Database.setSavepoint();
-                try {
-                    update survivorRow;
-
-                    Merge_Item__c itemSuccess = new Merge_Item__c(
-                        Id = item.Id,
-                        Merged_Record_JSON__c = mergedJson,
-                        Merge_Error__c = null,
-                        Status__c = 'Completed'
-                    );
-                    update itemSuccess;
-
-                    if (!secondaryIdsByType.containsKey(secondaryTypeName)) {
-                        secondaryIdsByType.put(secondaryTypeName, new Set<Id>());
-                    }
-                    secondaryIdsByType.get(secondaryTypeName).add(secondaryId);
-
-                    successCount++;
-                } catch (Exception updateEx) {
-                    Database.rollback(sp);
-                    String errMsg = mergeFailureMessage(updateEx);
-                    failMergeItem(item.Id, errMsg);
-                    failureCount++;
-                    errorLines.add(itemLabel + ': ' + errMsg);
-                }
-            } catch (Exception ex) {
-                String errMsg = mergeFailureMessage(ex);
-                failMergeItem(item.Id, errMsg);
+                secondaryIdsByType.get(rowResult.secondaryTypeName).add(rowResult.secondaryId);
+                successCount++;
+            } else {
                 failureCount++;
-                errorLines.add(itemLabel + ': ' + errMsg);
+                errorLines.add(rowResult.errorLine);
             }
         }
 
@@ -483,6 +511,316 @@ public with sharing class BulkMergeController {
         result.failureCount = failureCount;
         result.errors = errorLines;
         return result;
+    }
+
+    /**
+     * @description Enqueues background merge processing (chunked queueables) for large jobs or long-running merges.
+     */
+    @AuraEnabled
+    public static void startMergeJobInBackground(Id mergeJobId) {
+        if (mergeJobId == null) {
+            throw new AuraHandledException('Merge Job Id is required.');
+        }
+
+        List<Merge_Job__c> jobs = [
+            SELECT Id, Status__c
+            FROM Merge_Job__c
+            WHERE Id = :mergeJobId
+            WITH SECURITY_ENFORCED
+            LIMIT 1
+        ];
+        if (jobs.isEmpty()) {
+            throw new AuraHandledException('Merge job was not found.');
+        }
+        if (jobs[0].Status__c == 'Completed') {
+            throw new AuraHandledException('This merge job is already completed.');
+        }
+        if ('In Progress'.equals(jobs[0].Status__c)) {
+            throw new AuraHandledException('This merge job is already in progress.');
+        }
+
+        System.enqueueJob(new MergeJobQueueable(mergeJobId, true));
+    }
+
+    /**
+     * @description Invoked only from {@link MergeJobQueueable}.
+     */
+    public static void runAsyncMergeJobChunk(Id mergeJobId, Boolean firstRun) {
+        Id notifyUserId = UserInfo.getUserId();
+        try {
+            List<Merge_Job__c> jobs = [
+                SELECT Id, Status__c, CreatedById
+                FROM Merge_Job__c
+                WHERE Id = :mergeJobId
+                WITH SECURITY_ENFORCED
+                LIMIT 1
+            ];
+            if (jobs.isEmpty()) {
+                return;
+            }
+            Merge_Job__c job = jobs[0];
+            notifyUserId = job.CreatedById != null ? job.CreatedById : UserInfo.getUserId();
+
+            if (job.Status__c == 'Completed') {
+                return;
+            }
+
+            List<Merge_Item__c> allItems = MergeItemSelector.getInstance().getMergeItemsByMergeJobId(mergeJobId);
+            List<Merge_Item__c> workItems = new List<Merge_Item__c>();
+            for (Merge_Item__c w : allItems) {
+                if (!'Completed'.equals(w.Status__c)) {
+                    workItems.add(w);
+                }
+            }
+
+            if (firstRun) {
+                if (workItems.isEmpty()) {
+                    update new Merge_Job__c(
+                        Id = mergeJobId,
+                        Async_Last_Error__c = truncateAsyncJobError(
+                            'There are no pending or failed merge items to process.'
+                        )
+                    );
+                    return;
+                }
+
+                List<String> preconditionErrors = new List<String>();
+                preconditionErrors.addAll(collectDuplicatePrimaryJobErrors(workItems));
+                preconditionErrors.addAll(collectCrossJobConflictErrors(workItems, mergeJobId));
+                Map<String, Datetime> lastModifiedByIdKey = queryLastModifiedMapForWorkItems(workItems);
+                for (Merge_Item__c wi : workItems) {
+                    String staleLine = describeStaleItemIfChanged(wi, lastModifiedByIdKey);
+                    if (staleLine != null) {
+                        preconditionErrors.add(staleLine);
+                    }
+                }
+                if (!preconditionErrors.isEmpty()) {
+                    String msg = String.join(preconditionErrors, ' ');
+                    update new Merge_Job__c(
+                        Id = mergeJobId,
+                        Status__c = 'Pending',
+                        Async_Last_Error__c = truncateAsyncJobError(msg)
+                    );
+                    MergeJobNotificationService.notifyMergeJobPrecheckFailed(mergeJobId, notifyUserId, msg);
+                    return;
+                }
+
+                update new Merge_Job__c(Id = mergeJobId, Status__c = 'In Progress', Async_Last_Error__c = null);
+            }
+
+            final Integer chunkSize = 15;
+            List<Merge_Item__c> chunk = MergeItemSelector.getInstance()
+                .getNonCompletedMergeItemsChunk(mergeJobId, chunkSize);
+            if (chunk.isEmpty()) {
+                finalizeAsyncMergeJob(mergeJobId, notifyUserId);
+                return;
+            }
+
+            RecordSelector selector = RecordSelector.getInstance();
+            Map<String, Set<Id>> secondaryIdsByType = new Map<String, Set<Id>>();
+            for (Merge_Item__c item : chunk) {
+                MergeItemProcessResult pr = processMergeItemRow(item, selector);
+                if (pr.success && !String.isBlank(pr.secondaryTypeName) && pr.secondaryId != null) {
+                    if (!secondaryIdsByType.containsKey(pr.secondaryTypeName)) {
+                        secondaryIdsByType.put(pr.secondaryTypeName, new Set<Id>());
+                    }
+                    secondaryIdsByType.get(pr.secondaryTypeName).add(pr.secondaryId);
+                }
+            }
+
+            if (!secondaryIdsByType.isEmpty()) {
+                deleteSecondaryRecordsForMerge(secondaryIdsByType);
+            }
+
+            Integer remaining = MergeItemSelector.getInstance().countNonCompletedMergeItems(mergeJobId);
+            if (remaining > 0) {
+                System.enqueueJob(new MergeJobQueueable(mergeJobId, false));
+            } else {
+                finalizeAsyncMergeJob(mergeJobId, notifyUserId);
+            }
+        } catch (Exception e) {
+            try {
+                update new Merge_Job__c(
+                    Id = mergeJobId,
+                    Status__c = 'Pending',
+                    Async_Last_Error__c = truncateAsyncJobError(e.getMessage())
+                );
+            } catch (Exception ignored) {
+                System.debug(LoggingLevel.ERROR, ignored.getMessage());
+            }
+            MergeJobNotificationService.notifyMergeJobPrecheckFailed(
+                mergeJobId,
+                notifyUserId,
+                mergeFailureMessage(e)
+            );
+        }
+    }
+
+    private static void finalizeAsyncMergeJob(Id mergeJobId, Id notifyUserId) {
+        Integer failed = [
+            SELECT COUNT()
+            FROM Merge_Item__c
+            WHERE Merge_Job__c = :mergeJobId AND Status__c = 'Failed'
+            WITH SECURITY_ENFORCED
+        ];
+        String jobFinalStatus = failed > 0 ? 'Failed' : 'Completed';
+        update new Merge_Job__c(Id = mergeJobId, Status__c = jobFinalStatus, Async_Last_Error__c = null);
+        MergeJobNotificationService.notifyMergeJobFinished(mergeJobId, notifyUserId, jobFinalStatus, failed);
+    }
+
+    private static String truncateAsyncJobError(String message) {
+        if (String.isBlank(message)) {
+            return null;
+        }
+        Integer maxLen = 2000;
+        return message.length() > maxLen ? message.substring(0, maxLen) : message;
+    }
+
+    @AuraEnabled(cacheable=true)
+    public static List<Merge_Field_Template__c> getMergeFieldTemplates(String targetObjectApiName) {
+        return MergeFieldTemplateSelector.getInstance().getTemplatesForObject(targetObjectApiName);
+    }
+
+    @AuraEnabled
+    public static Merge_Field_Template__c saveMergeFieldTemplate(
+        String targetObjectApiName,
+        String description,
+        List<RecordSelector.MergeFieldSelection> fieldSelections
+    ) {
+        if (String.isBlank(targetObjectApiName)) {
+            throw new AuraHandledException('Object API name is required.');
+        }
+
+        List<RecordSelector.MergeFieldSelection> safeSelections = fieldSelections != null
+            ? fieldSelections
+            : new List<RecordSelector.MergeFieldSelection>();
+
+        Merge_Field_Template__c row = new Merge_Field_Template__c(
+            Target_Object__c = targetObjectApiName,
+            Description__c = description,
+            Field_Selections_JSON__c = JSON.serialize(safeSelections)
+        );
+        insert row;
+        return [
+            SELECT Id, Name, Target_Object__c, Description__c, Field_Selections_JSON__c
+            FROM Merge_Field_Template__c
+            WHERE Id = :row.Id
+            WITH SECURITY_ENFORCED
+            LIMIT 1
+        ];
+    }
+
+    @AuraEnabled
+    public static BulkCreateMergeItemsResult bulkCreateMergeItemsFromCsv(
+        Id mergeJobId,
+        String sObjectApiName,
+        String csvBody,
+        List<RecordSelector.MergeFieldSelection> fieldSelections
+    ) {
+        BulkCreateMergeItemsResult out = new BulkCreateMergeItemsResult();
+        out.successCount = 0;
+        out.failureCount = 0;
+        out.errors = new List<String>();
+
+        if (mergeJobId == null) {
+            out.errors.add('Merge Job is required.');
+            out.failureCount++;
+            return out;
+        }
+        if (String.isBlank(sObjectApiName)) {
+            out.errors.add('Object API name is required.');
+            out.failureCount++;
+            return out;
+        }
+        if (String.isBlank(csvBody)) {
+            out.errors.add('Paste at least one line of primary Id and secondary Id.');
+            out.failureCount++;
+            return out;
+        }
+
+        Merge_Job__c parentJob = [
+            SELECT Id, Status__c
+            FROM Merge_Job__c
+            WHERE Id = :mergeJobId
+            WITH SECURITY_ENFORCED
+            LIMIT 1
+        ];
+        if (parentJob.Status__c == 'Completed') {
+            out.errors.add('Cannot add merge items to a completed merge job.');
+            out.failureCount++;
+            return out;
+        }
+
+        List<RecordSelector.MergeFieldSelection> safeSelections = fieldSelections != null
+            ? fieldSelections
+            : new List<RecordSelector.MergeFieldSelection>();
+
+        List<String> lines = csvBody.split('\n');
+        Integer lineNum = 0;
+        for (String rawLine : lines) {
+            lineNum++;
+            String line = rawLine != null ? rawLine.trim() : '';
+            if (String.isBlank(line)) {
+                continue;
+            }
+            List<String> parts = line.split('\\s*,\\s*');
+            if (parts.size() < 2) {
+                out.failureCount++;
+                out.errors.add('Line ' + lineNum + ': expected primaryId,secondaryId');
+                continue;
+            }
+            try {
+                Id primaryId = Id.valueOf(parts[0].trim());
+                Id secondaryId = Id.valueOf(parts[1].trim());
+                if (primaryId == secondaryId) {
+                    throw new AuraHandledException('Primary and secondary must differ.');
+                }
+                String pType = primaryId.getSObjectType().getDescribe().getName();
+                String sType = secondaryId.getSObjectType().getDescribe().getName();
+                if (pType != sType) {
+                    throw new AuraHandledException('Both Ids must be the same object type.');
+                }
+                if (pType.toLowerCase() != sObjectApiName.toLowerCase()) {
+                    throw new AuraHandledException('Ids are ' + pType + ' but object selected was ' + sObjectApiName);
+                }
+
+                assertNoCrossJobActiveConflicts(new Set<Id>{ primaryId, secondaryId }, mergeJobId);
+
+                RecordSelector.MergeJsonBlob jsonPayload = RecordSelector.getInstance()
+                    .buildMergeItemJson(sObjectApiName, primaryId, secondaryId, safeSelections);
+                if (jsonPayload == null) {
+                    throw new AuraHandledException('Could not build merge data for the selected records.');
+                }
+
+                Map<String, Datetime> pairModified = queryLastModifiedForPair(primaryId, secondaryId);
+                Merge_Item__c item = new Merge_Item__c(
+                    Merge_Job__c = mergeJobId,
+                    Primary_Record_Id__c = primaryId,
+                    Secondary_Record_Id__c = secondaryId,
+                    Primary_Record_Name__c = jsonPayload.primaryRecordName,
+                    Secondary_Record_Name__c = jsonPayload.secondaryRecordName,
+                    Field_Selections_JSON__c = JSON.serialize(safeSelections),
+                    Primary_Record_JSON__c = jsonPayload.primaryJson,
+                    Secondary_Record_JSON__c = jsonPayload.secondaryJson,
+                    Merged_Record_JSON__c = jsonPayload.mergedJson,
+                    Primary_Source_Modified__c = pairModified.get(String.valueOf(primaryId)),
+                    Secondary_Source_Modified__c = pairModified.get(String.valueOf(secondaryId)),
+                    Merging_Object__c = sObjectApiName
+                );
+                insert item;
+                out.successCount++;
+            } catch (Exception ex) {
+                out.failureCount++;
+                out.errors.add('Line ' + lineNum + ': ' + mergeFailureMessage(ex));
+            }
+        }
+
+        if (out.successCount == 0 && out.failureCount == 0) {
+            out.errors.add('No valid data rows were found.');
+            out.failureCount++;
+        }
+
+        return out;
     }
 
     @TestVisible
@@ -509,7 +847,23 @@ public with sharing class BulkMergeController {
     }
 
     private static void failMergeItem(Id mergeItemId, String errorMessage) {
-        update new Merge_Item__c(Id = mergeItemId, Status__c = 'Failed', Merge_Error__c = errorMessage);
+        List<Merge_Item__c> rows = [
+            SELECT Attempt_Count__c
+            FROM Merge_Item__c
+            WHERE Id = :mergeItemId
+            WITH SECURITY_ENFORCED
+            LIMIT 1
+        ];
+        Integer nextAttempt = 1;
+        if (!rows.isEmpty() && rows[0].Attempt_Count__c != null) {
+            nextAttempt = rows[0].Attempt_Count__c.intValue() + 1;
+        }
+        update new Merge_Item__c(
+            Id = mergeItemId,
+            Status__c = 'Failed',
+            Merge_Error__c = errorMessage,
+            Attempt_Count__c = nextAttempt
+        );
     }
 
     /**
@@ -863,6 +1217,7 @@ public with sharing class BulkMergeController {
                     Id = pendingItem.Id,
                     Status__c = 'Pending',
                     Merge_Error__c = null,
+                    Attempt_Count__c = 0,
                     Primary_Source_Modified__c = freshLm.get(String.valueOf(pId)),
                     Secondary_Source_Modified__c = freshLm.get(String.valueOf(sId))
                 )
@@ -907,6 +1262,15 @@ public with sharing class BulkMergeController {
     public class MergeJobExecutionResult {
         @AuraEnabled
         public String jobStatus { get; set; }
+        @AuraEnabled
+        public Integer successCount { get; set; }
+        @AuraEnabled
+        public Integer failureCount { get; set; }
+        @AuraEnabled
+        public List<String> errors { get; set; }
+    }
+
+    public class BulkCreateMergeItemsResult {
         @AuraEnabled
         public Integer successCount { get; set; }
         @AuraEnabled

@@ -20,6 +20,15 @@
             </c-s-object-searchable-combobox>
         </div>
 
+        <lightning-combobox
+            class="slds-m-bottom_small"
+            label="Saved field template (optional)"
+            value={_templateId}
+            options={fieldTemplateOptions}
+            onchange={handleTemplatePick}
+            disabled={recordsComboboxDisabled}
+        ></lightning-combobox>
+
         <div class="slds-box slds-theme_default slds-m-top_medium slds-p-around_medium">
             <div class="slds-text-heading_small slds-m-bottom_small">Records</div>
 
@@ -48,6 +57,17 @@
         <!-- Field Merge Section -->
 
         <template lwc:if={showFieldMergeSection}>
+
+            <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center slds-m-bottom_small">
+                <div class="slds-col slds-size_1-of-1">
+                    <lightning-combobox
+                        label="Apply saved template to field choices"
+                        value={_templateId}
+                        options={fieldTemplateOptions}
+                        onchange={handleTemplateApplyToFields}
+                    ></lightning-combobox>
+                </div>
+            </div>
 
             <div class="slds-grid slds-grid_vertical slds-grid_vertical-align-center slds-grid_align-center slds-m-bottom_small">
                 <div>
@@ -113,6 +133,24 @@
                         </div>
                     </div>
                 </template>
+            </div>
+
+            <div class="slds-m-top_medium slds-grid slds-gutters slds-wrap">
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_8-of-12">
+                    <lightning-input
+                        label="Template description (when saving)"
+                        value={_templateDescription}
+                        onchange={handleTemplateDescriptionChange}
+                    ></lightning-input>
+                </div>
+                <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-align-bottom">
+                    <lightning-button
+                        label="Save as template"
+                        variant="neutral"
+                        disabled={finishDisabled}
+                        onclick={handleSaveAsTemplate}
+                    ></lightning-button>
+                </div>
             </div>
         </template>
     </lightning-modal-body>
