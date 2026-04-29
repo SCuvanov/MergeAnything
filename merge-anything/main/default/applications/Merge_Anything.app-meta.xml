@@ -50,7 +50,6 @@
     <label>Merge Anything</label>
     <navType>Standard</navType>
     <tabs>Bulk_Merge</tabs>
-    <tabs>Merge_Field_Template__c</tabs>
     <tabs>Merge_Job__c</tabs>
     <uiType>Lightning</uiType>
     <utilityBar>Merge_Anything_UtilityBar</utilityBar>

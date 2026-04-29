@@ -43,31 +43,41 @@
                         </div>
                     </div>
                 </div>
-                <div class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_3-of-12">
-                    <div class="slds-form-element">
-                        <label class="slds-form-element__label" for="merge-job-created-before">Created on or before</label>
-                        <div class="slds-form-element__control">
-                            <input
-                                id="merge-job-created-before"
-                                type="date"
-                                class="slds-input"
-                                value={_jobDateTo}
-                                onchange={handleJobDateToChangeNative}
-                            />
+                <div class="merge-job-before-reset-col slds-col slds-size_1-of-1 slds-medium-size_12-of-12 slds-large-size_6-of-12">
+                    <div class="merge-job-before-reset">
+                        <div class="merge-job-before-reset__date">
+                            <div class="slds-form-element">
+                                <label class="slds-form-element__label" for="merge-job-created-before">Created on or before</label>
+                                <div class="slds-form-element__control">
+                                    <input
+                                        id="merge-job-created-before"
+                                        type="date"
+                                        class="slds-input"
+                                        value={_jobDateTo}
+                                        onchange={handleJobDateToChangeNative}
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="merge-job-before-reset__reset">
+                            <button
+                                type="button"
+                                title="Clear created by and date filters"
+                                class="slds-button slds-button_neutral merge-job-reset-filters-btn"
+                                onclick={handleResetJobFilters}
+                                disabled={jobFiltersResetDisabled}
+                            >
+                                <lightning-icon
+                                    icon-name="utility:clear"
+                                    size="x-small"
+                                    variant="bare"
+                                    class="merge-job-reset-filters-btn__icon"
+                                    alternative-text=""
+                                ></lightning-icon>
+                                <span class="merge-job-reset-filters-btn__label">Reset filters</span>
+                            </button>
                         </div>
                     </div>
-                </div>
-                <div
-                    class="slds-col slds-size_1-of-1 slds-medium-size_6-of-12 slds-large-size_3-of-12 slds-align-bottom"
-                >
-                    <lightning-button
-                        variant="neutral"
-                        label="Reset filters"
-                        title="Clear created by and date filters"
-                        icon-name="utility:clear"
-                        onclick={handleResetJobFilters}
-                        disabled={jobFiltersResetDisabled}
-                    ></lightning-button>
                 </div>
             </div>
         </div>

@@ -28,6 +28,42 @@
     gap: var(--lwc-spacingSmall, 0.75rem);
 }
 
+/* "Created on or before" + Reset filters on one row (Reset to the right of the date picker) */
+.merge-job-before-reset {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-end;
+    gap: var(--lwc-spacingSmall, 0.75rem);
+    width: 100%;
+}
+
+.merge-job-before-reset__date {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.merge-job-before-reset__reset {
+    flex: 0 0 auto;
+}
+
+.merge-job-reset-filters-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--lwc-spacingXSmall, 0.5rem);
+    white-space: nowrap;
+}
+
+.merge-job-reset-filters-btn .merge-job-reset-filters-btn__label {
+    line-height: var(--lh-text, 1.25rem);
+}
+
+.merge-job-reset-filters-btn .merge-job-reset-filters-btn__icon {
+    display: inline-flex;
+    align-items: center;
+    line-height: 0;
+}
+
 /* Extra space below the table so row action menus are not clipped by the card / viewport */
 .merge-datatable-room {
     padding-bottom: var(--lwc-spacingXLarge, 2rem);

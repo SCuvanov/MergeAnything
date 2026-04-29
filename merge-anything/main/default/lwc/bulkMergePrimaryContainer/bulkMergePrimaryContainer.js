@@ -4,7 +4,6 @@ import { ShowToastEvent } from 'lightning/platformShowToastEvent';
 import createMergeJob from '@salesforce/apex/BulkMergeController.createMergeJob';
 import NewMergeJobModal from 'c/newMergeJobModal';
 import NewMergeItemModal from 'c/newMergeItemModal';
-import BulkMergeItemsModal from 'c/bulkMergeItemsModal';
 
 const MERGE_JOBS = 'merge_jobs';
 const MERGE_ITEMS = 'merge_items';
@@ -125,10 +124,6 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         return this._showMergeJobList || this.isMergeJobCompleted;
     }
 
-    get hideBulkImportButton() {
-        return this.hideNewMergeItemButton;
-    }
-
     get itemFiltersResetDisabled() {
         return !(this._itemObjectFilter || '').trim() && !this._itemErrorsOnly;
     }
@@ -208,24 +203,6 @@ export default class BulkMergePrimaryContainer extends LightningElement {
             }
             this.dispatchMergeItemsInvalidated();
         }
-    }
-
-    async handleBulkImportCsv() {
-        if (this.isMergeJobCompleted || !this.recordId) {
-            return;
-        }
-        const result = await BulkMergeItemsModal.open({
-            size: 'large',
-            mergeJobId: this.recordId,
-        });
-        if (!result || result.status !== SUCCESS) {
-            return;
-        }
-        const mergeItemList = this.template.querySelector('c-merge-item-list');
-        if (mergeItemList) {
-            await mergeItemList.refreshList();
-        }
-        this.dispatchMergeItemsInvalidated();
     }
 
     handleItemObjectFilterInput(event) {
