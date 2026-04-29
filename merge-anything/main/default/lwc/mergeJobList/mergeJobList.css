@@ -2,17 +2,35 @@
     display: block;
 }
 
-/* Top: Show Me (shrink to control width). Bottom: filters full width, same left origin (no gutter negative margin). */
 .merge-job-toolbar {
+    display: block;
+}
+
+.merge-job-toolbar__row {
     display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-    gap: var(--lwc-spacingSmall, 0.75rem);
+    flex-direction: row;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: var(--lwc-spacingMedium, 1rem);
+    width: 100%;
+}
+
+.merge-job-toolbar__segment {
+    flex: 0 1 auto;
+    min-width: 0;
+    max-width: 100%;
+}
+
+.merge-job-toolbar__segment--reset {
+    border-left: 1px solid #dddbda;
+    padding-left: var(--lwc-spacingMedium, 1rem);
+    flex: 0 0 auto;
 }
 
 .merge-job-toolbar__showme {
     flex: 0 0 auto;
     max-width: 100%;
+    margin-bottom: 0.125rem;
 }
 
 .merge-job-toolbar__showme ::slotted(lightning-combobox) {
@@ -22,49 +40,32 @@
     max-width: 100%;
 }
 
-.merge-job-toolbar__filters {
-    align-self: stretch;
-    width: 100%;
-    gap: var(--lwc-spacingSmall, 0.75rem);
-}
-
-/* "Created on or before" + Reset filters on one row (Reset to the right of the date picker) */
-.merge-job-before-reset {
-    display: flex;
-    flex-direction: row;
-    align-items: flex-end;
-    gap: var(--lwc-spacingSmall, 0.75rem);
-    width: 100%;
-}
-
-.merge-job-before-reset__date {
-    flex: 1 1 auto;
-    min-width: 0;
-}
-
-.merge-job-before-reset__reset {
+.merge-job-toolbar__reset-filters {
     flex: 0 0 auto;
 }
 
-.merge-job-reset-filters-btn {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    gap: var(--lwc-spacingXSmall, 0.5rem);
-    white-space: nowrap;
+.merge-job-toolbar__created-by {
+    flex: 0 1 18rem;
+    min-width: 14rem;
+    max-width: 100%;
 }
 
-.merge-job-reset-filters-btn .merge-job-reset-filters-btn__label {
-    line-height: var(--lh-text, 1.25rem);
+.merge-job-toolbar__created-by c-record-searchable-combobox {
+    display: block;
+    width: 100%;
 }
 
-.merge-job-reset-filters-btn .merge-job-reset-filters-btn__icon {
-    display: inline-flex;
-    align-items: center;
-    line-height: 0;
+.merge-job-toolbar__date-block {
+    flex: 0 1 14rem;
+    min-width: 0;
+    max-width: 100%;
 }
 
-/* Extra space below the table so row action menus are not clipped by the card / viewport */
+.merge-job-toolbar__date-block lightning-input {
+    display: block;
+    width: 100%;
+}
+
 .merge-datatable-room {
     padding-bottom: var(--lwc-spacingXLarge, 2rem);
 }

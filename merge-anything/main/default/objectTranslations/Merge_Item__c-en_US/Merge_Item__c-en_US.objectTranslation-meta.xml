@@ -18,6 +18,10 @@
             <label><!-- Record Details --></label>
             <section>Record Details</section>
         </sections>
+        <sections>
+            <label><!-- Record JSON --></label>
+            <section>Record JSON</section>
+        </sections>
     </layouts>
     <startsWith>Consonant</startsWith>
 </CustomObjectTranslation>

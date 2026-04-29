@@ -1,3 +1,40 @@
+/* Merge action: label row, then [combobox | info helptext] */
+.merge-action-field {
+    display: block;
+}
+
+.merge-action-label-row {
+    margin-bottom: var(--lwc-spacingXxSmall, 0.25rem);
+}
+
+.merge-action-label-row .slds-form-element__label {
+    padding: 0;
+    margin: 0;
+}
+
+.merge-action-picker-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: var(--lwc-spacingXSmall, 0.5rem);
+}
+
+.merge-action-picker {
+    flex: 0 1 auto;
+    display: block;
+    width: 100%;
+    max-width: 14rem;
+    min-width: 0;
+}
+
+.merge-action-picker lightning-combobox {
+    display: block;
+}
+
+.merge-action-helptext {
+    flex: 0 0 auto;
+}
+
 /* Row: radio | [label | divider | value] — label and value vertically centered; divider full row height */
 .field-merge-value-row {
     display: flex;

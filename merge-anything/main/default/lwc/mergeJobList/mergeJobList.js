@@ -58,7 +58,6 @@ export default class MergeJobList extends LightningElement {
     _error;
     _jobCreatedByFilter = '';
     _jobDateFrom = '';
-    _jobDateTo = '';
 
     constructor() {
         super();
@@ -108,30 +107,20 @@ export default class MergeJobList extends LightningElement {
         return (this._filteredMergeJobs?.length ?? 0) === 0;
     }
 
-    get emptyJobMessage() {
-        const total = this._mergeJobs?.length ?? 0;
-        if (total === 0) {
-            return 'No merge jobs found. Create one with New Merge Job.';
-        }
-        return 'No merge jobs match the current filter.';
+    get noJobsAtAllMessage() {
+        return 'No merge jobs found. Create one with New Merge Job.';
     }
 
-    get creatorFilterOptions() {
-        const base = [{ label: 'All', value: '' }];
-        if (!this._mergeJobs?.length) {
-            return base;
+    get hideJobFacetResetButton() {
+        return !this._jobCreatedByFilter && !this._jobDateFrom;
+    }
+
+    get filteredJobsEmptyMessage() {
+        const total = this._mergeJobs?.length ?? 0;
+        if (total === 0) {
+            return this.noJobsAtAllMessage;
         }
-        const map = new Map();
-        this._mergeJobs.forEach((j) => {
-            const id = j.CreatedById;
-            if (id && !map.has(id)) {
-                map.set(id, j.CreatedBy?.Name || id);
-            }
-        });
-        const rest = [...map.entries()]
-            .map(([value, label]) => ({ label, value }))
-            .sort((a, b) => a.label.localeCompare(b.label, undefined, { sensitivity: 'base' }));
-        return [...base, ...rest];
+        return 'No merge jobs match the current filter.';
     }
 
     @api
@@ -227,43 +216,28 @@ export default class MergeJobList extends LightningElement {
                 return d >= fromMs;
             });
         }
-        if (this._jobDateTo) {
-            const to = new Date(this._jobDateTo);
-            to.setHours(23, 59, 59, 999);
-            const toMs = to.getTime();
-            this._filteredMergeJobs = this._filteredMergeJobs.filter((merge) => {
-                const d = merge.CreatedDate != null ? new Date(merge.CreatedDate).getTime() : 0;
-                return d <= toMs;
-            });
-        }
 
         this.setSelectedMerge();
     }
 
-    handleCreatorFilterChange(event) {
-        this._jobCreatedByFilter = event.detail.value || '';
+    handleCreatedByItemSelected(event) {
+        this._jobCreatedByFilter = event.detail.id || '';
         this.filterMerges();
     }
 
-    handleJobDateFromChangeNative(event) {
-        this._jobDateFrom = event.target.value || '';
+    handleJobDateFromChange(event) {
+        this._jobDateFrom = event.detail.value || '';
         this.filterMerges();
-    }
-
-    handleJobDateToChangeNative(event) {
-        this._jobDateTo = event.target.value || '';
-        this.filterMerges();
-    }
-
-    get jobFiltersResetDisabled() {
-        return !this._jobCreatedByFilter && !this._jobDateFrom && !this._jobDateTo;
     }
 
     handleResetJobFilters() {
         this._jobCreatedByFilter = '';
         this._jobDateFrom = '';
-        this._jobDateTo = '';
         this.filterMerges();
+        const picker = this.template.querySelector('[data-id="mergeJobCreatedByLookup"]');
+        if (picker && typeof picker.clearPicker === 'function') {
+            picker.clearPicker();
+        }
     }
 
     setSelectedMerge() {

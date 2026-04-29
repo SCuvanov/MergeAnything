@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help><!-- Used to detect whether the secondary record changed after this merge item was defined. --></help>
+    <label><!-- Secondary Source Modified --></label>
+    <name>Secondary_Source_Modified__c</name>
+</CustomFieldTranslation>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomFieldTranslation xmlns="http://soap.sforce.com/2006/04/metadata">
+    <help><!-- Select how related records should be handled when the merge runs. --></help>
+    <label><!-- Merge Action --></label>
+    <name>Merge_Action__c</name>
+    <picklistValues>
+        <masterLabel>Merge and Keep</masterLabel>
+        <translation><!-- Merge and Keep --></translation>
+    </picklistValues>
+    <picklistValues>
+        <masterLabel>Merge, Reparent and Delete</masterLabel>
+        <translation><!-- Merge, Reparent and Delete --></translation>
+    </picklistValues>
+</CustomFieldTranslation>

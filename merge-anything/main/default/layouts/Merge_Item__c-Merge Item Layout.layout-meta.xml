@@ -28,6 +28,10 @@
                 <field>Record_Object__c</field>
             </layoutItems>
             <layoutItems>
+                <behavior>Edit</behavior>
+                <field>Merge_Action__c</field>
+            </layoutItems>
+            <layoutItems>
                 <behavior>Readonly</behavior>
                 <field>Attempt_Count__c</field>
             </layoutItems>

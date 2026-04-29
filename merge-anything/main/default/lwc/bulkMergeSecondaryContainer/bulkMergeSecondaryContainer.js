@@ -327,6 +327,9 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
             headerLabel: 'Start merge job?',
             bodyMessage:
                 'Pending or failed merge items will be merged into their primary records, and secondary records will be deleted. Completed items are skipped. Duplicate primaries, records used on another pending merge item, or records changed after the merge item was created will block the run. Use Validate to check first. Rollback can undo completed items (including after a partial failure). Continue?',
+            requireCheckbox: true,
+            checkboxLabel:
+                'I understand that merge items will run as described, secondaries may be deleted, and I want to start this merge job now.',
         });
         if (!confirmed) {
             return;
@@ -377,6 +380,9 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
             headerLabel: 'Run merge in the background?',
             bodyMessage:
                 'Pending or failed items will be processed in chunks. You will get an in-app notification when the job finishes. If the run cannot start (for example validation failures), details are saved on the merge job in Async Last Error. Continue?',
+            requireCheckbox: true,
+            checkboxLabel:
+                'I understand items will be merged in the background as described and want to queue this run.',
         });
         if (!confirmed) {
             return;
@@ -419,6 +425,9 @@ export default class BulkMergeSecondaryContainer extends LightningElement {
             headerLabel: 'Roll back Merge Job',
             bodyMessage:
                 'Primary records will be restored from the saved snapshot, secondary records will be undeleted from the recycle bin, and completed items will return to Pending (failed items are left as-is). The merge job will return to Pending. Continue?',
+            requireCheckbox: true,
+            checkboxLabel:
+                'I understand that primaries will be restored, secondaries will be undeleted, completed items will return to Pending, and I want to roll back this merge job.',
         });
         if (!confirmed) {
             return;

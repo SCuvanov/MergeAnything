@@ -29,35 +29,43 @@
         </template>
         <template lwc:if={showMergeItemListSection}>
           <div class="slds-m-top_medium item-filter-toolbar">
-            <div class="item-filter-toolbar__showme">
-              <lightning-combobox name="merge_views" label="Show Me" value={_mergeView} placeholder="Select View"
-                options={_mergeViews} onchange={handleMergeView}>
-              </lightning-combobox>
-            </div>
-            <div class="slds-grid slds-wrap slds-grid_vertical-align-end item-filter-toolbar__filters">
-              <div class="slds-col slds-size_1-of-1 slds-medium-size_5-of-12">
-                <lightning-input
-                  label="Filter by record object (contains)"
-                  value={_itemObjectFilter}
-                  onchange={handleItemObjectFilterInput}
-                ></lightning-input>
+            <div class="item-filter-toolbar__row">
+              <div class="item-filter-toolbar__segment">
+                <div class="item-filter-toolbar__showme">
+                  <lightning-combobox name="merge_views" label="Show Me" value={_mergeView} placeholder="Select View"
+                    options={_mergeViews} onchange={handleMergeView}>
+                  </lightning-combobox>
+                </div>
               </div>
-              <div class="slds-col slds-size_1-of-1 slds-medium-size_4-of-12 slds-align-bottom">
-                <lightning-input
-                  type="checkbox"
-                  label="Errors only (failed status or merge error text)"
-                  checked={_itemErrorsOnly}
-                  onchange={handleItemErrorsOnlyChange}
-                ></lightning-input>
+              <div class="item-filter-toolbar__segment">
+                <div class="item-filter-toolbar__object">
+                  <lightning-input
+                    label="Filter by record object (contains)"
+                    value={_itemObjectFilter}
+                    onchange={handleItemObjectFilterInput}
+                  ></lightning-input>
+                </div>
               </div>
-              <div class="slds-col slds-size_1-of-1 slds-medium-size_3-of-12 slds-align-bottom">
+              <div class="item-filter-toolbar__segment">
+                <div class="item-filter-toolbar__errors">
+                  <lightning-input
+                    type="checkbox"
+                    label="Errors only"
+                    title="Failed status or merge error text"
+                    checked={_itemErrorsOnly}
+                    onchange={handleItemErrorsOnlyChange}
+                  ></lightning-input>
+                </div>
+              </div>
+              <div class="item-filter-toolbar__segment item-filter-toolbar__segment--reset">
                 <lightning-button
                   variant="neutral"
                   label="Reset filters"
                   title="Clear object filter and errors-only"
                   icon-name="utility:clear"
+                  class="item-filter-toolbar__reset-filters"
                   onclick={handleResetItemFilters}
-                  disabled={itemFiltersResetDisabled}
+                  hidden={hideItemFacetResetButton}
                 ></lightning-button>
               </div>
             </div>

@@ -31,6 +31,11 @@ const BASE_COLUMNS = [
         type: 'text',
     },
     {
+        label: 'Merge Action',
+        fieldName: '_mergeActionDisplay',
+        type: 'text',
+    },
+    {
         label: 'Primary Record',
         fieldName: 'Primary_Record_Link__c',
         type: 'url',
@@ -52,12 +57,23 @@ const BASE_COLUMNS = [
     { label: 'Created Date', fieldName: 'CreatedDate', type: 'date' },
 ];
 
+function mergeActionDisplay(apiValue) {
+    if (apiValue === 'Merge_and_Keep') {
+        return 'Merge and Keep';
+    }
+    if (!apiValue || apiValue === 'Merge_Reparent_and_Delete') {
+        return 'Merge, Reparent and Delete';
+    }
+    return apiValue;
+}
+
 function decorateMergeItemsForDisplay(items) {
     if (!items) {
         return items;
     }
     return items.map((row) => ({
         ...row,
+        _mergeActionDisplay: mergeActionDisplay(row.Merge_Action__c),
         _primaryRecordLabel: row.Primary_Record_Name__c || row.Primary_Record_Id__c || '',
         _secondaryRecordLabel: row.Secondary_Record_Name__c || row.Secondary_Record_Id__c || '',
     }));
@@ -218,6 +234,9 @@ export default class MergeItemList extends LightningElement {
             size: 'small',
             headerLabel: 'Roll back merge item?',
             bodyMessage: `Restore the primary record and undelete the secondary for "${row.Name}"? If the merge job finished with errors, only completed line items can be rolled back individually.`,
+            requireCheckbox: true,
+            checkboxLabel:
+                'I understand this will restore the primary and undelete the secondary for this line, and I want to roll back this merge item.',
         });
         if (!confirmed) {
             return;

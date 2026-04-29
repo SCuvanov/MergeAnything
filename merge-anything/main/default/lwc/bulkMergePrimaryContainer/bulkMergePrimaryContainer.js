@@ -124,7 +124,7 @@ export default class BulkMergePrimaryContainer extends LightningElement {
         return this._showMergeJobList || this.isMergeJobCompleted;
     }
 
-    get itemFiltersResetDisabled() {
+    get hideItemFacetResetButton() {
         return !(this._itemObjectFilter || '').trim() && !this._itemErrorsOnly;
     }
 

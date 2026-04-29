@@ -1,4 +1,7 @@
 public with sharing class BulkMergeController {
+    private static final String MERGE_ACTION_KEEP = 'Merge_and_Keep';
+    private static final String MERGE_ACTION_REPARENT_DELETE = 'Merge_Reparent_and_Delete';
+
     @AuraEnabled(cacheable=true)
     public static Merge_Job__c getNewestMergeJob() {
         return MergeJobSelector.getInstance().getNewestMergeJob();
@@ -172,6 +175,7 @@ public with sharing class BulkMergeController {
      * @param primaryRecordId   Surviving-record candidate / primary Id.
      * @param secondaryRecordId Duplicate / secondary Id.
      * @param fieldSelections   Per-field choice: {@code usePrimary == false} takes secondary value in merged JSON.
+     * @param mergeAction      {@code Merge_and_Keep} or {@code Merge_Reparent_and_Delete} ({@code null} behaves as reparent/delete).
      */
     @AuraEnabled
     public static Merge_Item__c createMergeItem(
@@ -179,7 +183,8 @@ public with sharing class BulkMergeController {
         String sObjectApiName,
         Id primaryRecordId,
         Id secondaryRecordId,
-        List<RecordSelector.MergeFieldSelection> fieldSelections
+        List<RecordSelector.MergeFieldSelection> fieldSelections,
+        String mergeAction
     ) {
         if (mergeJobId == null) {
             throw new AuraHandledException('Merge Job is required.');
@@ -224,7 +229,8 @@ public with sharing class BulkMergeController {
             Merged_Record_JSON__c = jsonPayload.mergedJson,
             Primary_Source_Modified__c = pairModified.get(String.valueOf(primaryRecordId)),
             Secondary_Source_Modified__c = pairModified.get(String.valueOf(secondaryRecordId)),
-            Record_Object__c = sObjectApiName
+            Record_Object__c = sObjectApiName,
+            Merge_Action__c = normalizeMergeAction(mergeAction)
         );
         insert item;
 
@@ -237,7 +243,8 @@ public with sharing class BulkMergeController {
                 Primary_Record_Name__c,
                 Secondary_Record_Name__c,
                 Primary_Record_Link__c,
-                Secondary_Record_Link__c
+                Secondary_Record_Link__c,
+                Merge_Action__c
             FROM Merge_Item__c
             WHERE Id = :item.Id
         ];
@@ -443,10 +450,22 @@ public with sharing class BulkMergeController {
         return result;
     }
 
+    private static String normalizeMergeAction(String mergeActionRaw) {
+        if (MERGE_ACTION_KEEP.equals(mergeActionRaw)) {
+            return MERGE_ACTION_KEEP;
+        }
+        return MERGE_ACTION_REPARENT_DELETE;
+    }
+
+    private static Boolean mergeActionReparentsThenDeletes(String normalized) {
+        return MERGE_ACTION_REPARENT_DELETE.equals(normalized);
+    }
+
     private class MergeItemProcessResult {
         Boolean success;
         String secondaryTypeName;
         Id secondaryId;
+        Boolean queueSecondaryDeletion;
         String errorLine;
     }
 
@@ -456,6 +475,7 @@ public with sharing class BulkMergeController {
     private static MergeItemProcessResult processMergeItemRow(Merge_Item__c item, RecordSelector selector) {
         MergeItemProcessResult res = new MergeItemProcessResult();
         res.success = false;
+        res.queueSecondaryDeletion = false;
         String itemLabel = item.Name != null ? item.Name : String.valueOf(item.Id);
         try {
             if (item.Primary_Record_Id__c == null || item.Secondary_Record_Id__c == null) {
@@ -474,6 +494,8 @@ public with sharing class BulkMergeController {
             if (primaryTypeName != secondaryTypeName) {
                 throw new AuraHandledException('Primary and secondary records must be the same object type.');
             }
+
+            String mergeActionNormalized = normalizeMergeAction(item.Merge_Action__c);
 
             List<RecordSelector.MergeFieldSelection> selections = selector.parseFieldSelectionsFromJson(
                 item.Field_Selections_JSON__c
@@ -503,6 +525,10 @@ public with sharing class BulkMergeController {
             try {
                 update survivorRow;
 
+                if (mergeActionReparentsThenDeletes(mergeActionNormalized)) {
+                    MergeRelationshipRepointer.reparentInboundLookups(primaryTypeName, secondaryId, primaryId);
+                }
+
                 Merge_Item__c itemSuccess = new Merge_Item__c(
                     Id = item.Id,
                     Merged_Record_JSON__c = mergedJson,
@@ -515,6 +541,7 @@ public with sharing class BulkMergeController {
                 res.success = true;
                 res.secondaryTypeName = secondaryTypeName;
                 res.secondaryId = secondaryId;
+                res.queueSecondaryDeletion = mergeActionReparentsThenDeletes(mergeActionNormalized);
             } catch (Exception updateEx) {
                 Database.rollback(sp);
                 String errMsg = mergeFailureMessage(updateEx);
@@ -531,11 +558,12 @@ public with sharing class BulkMergeController {
 
     /**
      * @description Sets the job to In Progress, then processes each non-Completed merge item: validates input, updates
-     *              the surviving primary from merged JSON, updates the merge item to Completed, and queues the
-     *              secondary Id for deletion. Record update failures are isolated with {@link Database#setSavepoint}:
-     *              the failed item is set to Failed and {@code Merge_Error__c} stores the message; other items
-     *              continue. Secondaries are deleted only for successful items. Job status is Completed when every
-     *              processed item succeeds; otherwise Failed (including partial success).
+     *              the surviving primary from merged JSON; when Merge Action is &quot;Merge, Reparent and Delete&quot;, reparents
+     *              inbound lookups from the duplicate to the primary and deletes the duplicate; &quot;Merge and Keep&quot; updates the
+     *              primary only. Record update failures are isolated with {@link Database#setSavepoint}: the failed item is set
+     *              to Failed and {@code Merge_Error__c} stores the message; other items continue. Secondaries are deleted only
+     *              for successful items that use &quot;Merge, Reparent and Delete&quot;. Job status is Completed when every processed
+     *              item succeeds; otherwise Failed (including partial success).
      */
     @AuraEnabled
     public static MergeJobExecutionResult executeMergeJob(Id mergeJobId) {
@@ -602,11 +630,13 @@ public with sharing class BulkMergeController {
             }
 
             MergeItemProcessResult rowResult = processMergeItemRow(item, selector);
-            if (rowResult.success) {
+            if (rowResult.success && rowResult.queueSecondaryDeletion) {
                 if (!secondaryIdsByType.containsKey(rowResult.secondaryTypeName)) {
                     secondaryIdsByType.put(rowResult.secondaryTypeName, new Set<Id>());
                 }
                 secondaryIdsByType.get(rowResult.secondaryTypeName).add(rowResult.secondaryId);
+                successCount++;
+            } else if (rowResult.success) {
                 successCount++;
             } else {
                 failureCount++;
@@ -736,7 +766,12 @@ public with sharing class BulkMergeController {
             Map<String, Set<Id>> secondaryIdsByType = new Map<String, Set<Id>>();
             for (Merge_Item__c item : chunk) {
                 MergeItemProcessResult pr = processMergeItemRow(item, selector);
-                if (pr.success && !String.isBlank(pr.secondaryTypeName) && pr.secondaryId != null) {
+                if (
+                    pr.success &&
+                    pr.queueSecondaryDeletion &&
+                    !String.isBlank(pr.secondaryTypeName) &&
+                    pr.secondaryId != null
+                ) {
                     if (!secondaryIdsByType.containsKey(pr.secondaryTypeName)) {
                         secondaryIdsByType.put(pr.secondaryTypeName, new Set<Id>());
                     }
@@ -1059,6 +1094,7 @@ public with sharing class BulkMergeController {
             SELECT
                 Id,
                 Name,
+                Merge_Action__c,
                 Primary_Record_Id__c,
                 Primary_Record_JSON__c,
                 Secondary_Record_Id__c,
@@ -1087,7 +1123,7 @@ public with sharing class BulkMergeController {
         }
 
         List<Merge_Item__c> rows = [
-            SELECT Id, Name, Merge_Job__c, Status__c, Primary_Record_Id__c, Primary_Record_JSON__c, Secondary_Record_Id__c
+            SELECT Id, Name, Merge_Job__c, Merge_Action__c, Status__c, Primary_Record_Id__c, Primary_Record_JSON__c, Secondary_Record_Id__c
             FROM Merge_Item__c
             WHERE Id = :mergeItemId
             WITH SECURITY_ENFORCED
@@ -1157,7 +1193,9 @@ public with sharing class BulkMergeController {
                 restoresByType.put(restoreTypeName, new Map<Id, SObject>());
             }
             restoresByType.get(restoreTypeName).put(primaryId, restoreRow);
-            secondaryIdSet.add(secondaryId);
+            if (mergeActionReparentsThenDeletes(normalizeMergeAction(item.Merge_Action__c))) {
+                secondaryIdSet.add(secondaryId);
+            }
         }
 
         for (String typeName : restoresByType.keySet()) {

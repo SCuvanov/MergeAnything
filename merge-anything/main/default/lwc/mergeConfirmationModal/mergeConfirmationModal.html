@@ -2,10 +2,26 @@
     <lightning-modal-header label={headerLabel}></lightning-modal-header>
     <lightning-modal-body>
         <lightning-formatted-text class="slds-text-heading_small" value={bodyMessage}></lightning-formatted-text>
+        <template lwc:if={requireCheckbox}>
+            <div class="slds-m-top_medium">
+                <lightning-input
+                    type="checkbox"
+                    label={acknowledgementText}
+                    checked={_acknowledged}
+                    onchange={handleAcknowledgementChange}
+                ></lightning-input>
+            </div>
+        </template>
     </lightning-modal-body>
     <lightning-modal-footer>
         <lightning-button label="Cancel" onclick={handleCancel}></lightning-button>
-        <lightning-button class="slds-m-left_xx-small" label="Continue" variant="brand" onclick={handleConfirm}>
+        <lightning-button
+            class="slds-m-left_xx-small"
+            label="Continue"
+            variant="brand"
+            disabled={continueDisabled}
+            onclick={handleConfirm}
+        >
         </lightning-button>
     </lightning-modal-footer>
 </template>

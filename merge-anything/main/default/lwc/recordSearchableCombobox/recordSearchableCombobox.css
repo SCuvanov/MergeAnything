@@ -21,12 +21,26 @@ lightning-input {
     width: 100%;
 }
 
-.slds-combobox_container,
+.slds-combobox_container {
+    position: relative;
+}
+
 .slds-combobox {
     overflow: visible;
 }
 
-/* Absolute dropdowns are clipped inside lightning-modal; in-flow layout grows the modal body. */
+/* Overlays surrounding layout; default for page contexts (merge list, etc.). */
+.dropdown-overlay {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    margin-top: var(--slds-g-spacing-xx-small, 0.25rem);
+    z-index: 9000;
+    transform: none;
+}
+
+/* In-flow: avoids clipping inside lightning-modal; opt in via use-in-flow-dropdown. */
 .dropdown-in-flow {
     position: relative;
     top: auto;

@@ -6,6 +6,11 @@
     </applicationVisibilities>
     <description>Administrative access to the Merge Anything App.</description>
     <fieldPermissions>
+        <editable>false</editable>
+        <field>Merge_Item__c.Attempt_Count__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
         <editable>true</editable>
         <field>Merge_Item__c.Field_Selections_JSON__c</field>
         <readable>true</readable>
@@ -17,22 +22,17 @@
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
+        <field>Merge_Item__c.Merge_Action__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
         <field>Merge_Item__c.Merge_Error__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
         <editable>true</editable>
         <field>Merge_Item__c.Merged_Record_JSON__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>true</editable>
-        <field>Merge_Item__c.Record_Object__c</field>
-        <readable>true</readable>
-    </fieldPermissions>
-    <fieldPermissions>
-        <editable>false</editable>
-        <field>Merge_Item__c.Attempt_Count__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>
@@ -58,6 +58,11 @@
     <fieldPermissions>
         <editable>true</editable>
         <field>Merge_Item__c.Primary_Source_Modified__c</field>
+        <readable>true</readable>
+    </fieldPermissions>
+    <fieldPermissions>
+        <editable>true</editable>
+        <field>Merge_Item__c.Record_Object__c</field>
         <readable>true</readable>
     </fieldPermissions>
     <fieldPermissions>

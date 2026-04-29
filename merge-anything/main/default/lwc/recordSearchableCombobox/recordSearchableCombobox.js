@@ -46,6 +46,18 @@ export default class RecordSearchableCombobox extends LightningElement {
         }
     }
 
+    /** Clears the search box and selection (for example when a parent resets filters). */
+    @api
+    clearPicker() {
+        this.clearSelectionAfterObjectContextChange();
+    }
+
+    /**
+     * When true, dropdown stays in document flow (avoids clipping inside overflow containers such as modals).
+     * When false (default), dropdown is absolutely positioned with a high z-index so it overlays surrounding layout.
+     */
+    @api useInFlowDropdown = false;
+
     _searchValue;
     _searchValueTemp;
     _items;
@@ -58,6 +70,11 @@ export default class RecordSearchableCombobox extends LightningElement {
 
     get formElementClass() {
         return this._selectionLocked ? 'slds-form-element comboboxselected' : 'slds-form-element';
+    }
+
+    get dropdownClass() {
+        const base = 'slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid';
+        return this.useInFlowDropdown ? `${base} dropdown-in-flow` : `${base} dropdown-overlay`;
     }
 
     @wire(getRecordsWithEditableFields, { sObjectApiName: '$sobjectApiName', name: '$_searchValueTemp' })

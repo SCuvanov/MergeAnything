@@ -9,9 +9,7 @@
                             onchange={handleOnChange} oncommit={handleOnCommit}></lightning-input>
                     </div>
                     <template lwc:if={_showDropdown}>
-                        <div id="listbox-id-15"
-                            class="slds-dropdown slds-dropdown_length-5 slds-dropdown_fluid dropdown-in-flow"
-                            role="listbox">
+                        <div id="listbox-id-15" class={dropdownClass} role="listbox">
                             <ul class="slds-listbox slds-listbox_vertical" role="presentation">
                                 <template for:each={_items} for:item="item">
                                     <li data-id={item.Id} data-name={item.Name}
